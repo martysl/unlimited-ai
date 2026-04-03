@@ -746,28 +746,6 @@ Deactivate the emulator (no API key required).
 - Access directly: `http://localhost:11436/config.html`
 - Check browser console for errors
 
-## Migration from v1 (Single-Model Behavior)
-
-If you're upgrading from the previous single-model version:
-
-1. **Your existing config is preserved** — `puterModel` and `spoofedOpenAIModelId` still work.
-2. **New `apiKey` field** — Default is `sk-puter-123`. All `/v1/*` endpoints now require it.
-3. **New `defaultModel` field** — Set this to your preferred fallback model. If unset, it falls back to `puterModel`.
-4. **Model routing changed** — Previously all requests went to the single configured Puter model. Now the `model` field in each request is used directly if the model is known, or falls back to `defaultModel`.
-5. **Add aliases for backward compatibility** — If your apps expect specific model names, add them to `modelAliases`:
-   ```json
-   {
-     "modelAliases": {
-       "gpt-4o-mini": "gpt-5-nano"
-     }
-   }
-   ```
-6. **Token counting** — Now always done by the emulator, not from Puter's usage data.
-7. **Streaming** — Now emulated (full response → word-level SSE chunks) for a more realistic experience.
-8. **New endpoints available** — TTS, image generation, transcription, and embeddings are now wired up. They require the emulator to be active and a valid API key.
-
-## Development
-
 **Running Tests:**
 ```bash
 npm test
@@ -778,13 +756,6 @@ Edit `server/puter-client.js` to integrate alternative AI providers.
 
 **Adding Endpoints:**
 Add routes in `server/index.js` and corresponding Puter client methods in `server/puter-client.js`.
-
-## Resources
-
-- [Puter.js Documentation](https://docs.puter.com/)
-- [Puter Free LLM API Tutorial](https://developer.puter.com/tutorials/free-llm-api/)
-- [OpenAI API Reference](https://platform.openai.com/docs/api-reference/chat)
-- [Pinokio Documentation](https://docs.pinokio.computer/)
 
 ## License
 
