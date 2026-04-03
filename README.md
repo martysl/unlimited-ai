@@ -39,10 +39,38 @@ The app will automatically:
 
 ### Manual Installation
 ```bash
-git clone https://github.com/amondeuz/model-emulator.git
+git clone https://github.com/martysl/unlimited-ai.git
 cd puter-local-model-emulator
 npm install
 npm start
+```
+
+Server starts on `http://localhost:11436` by default.
+
+### Docker
+
+**Quick start:**
+```bash
+docker run -d \
+  --name unlimited-ai \
+  -p 11436:11436 \
+  -e PUTER_AUTH_TOKEN=your_token_here \
+  -v $(pwd)/config:/app/config \
+  -v $(pwd)/cache:/app/cache \
+  --restart unless-stopped \
+  ghcr.io/martysl/unlimited-ai:latest
+```
+
+**With docker-compose:**
+```bash
+# Create .env file
+echo "PUTER_AUTH_TOKEN=your_token_here" > .env
+
+# Start
+docker compose up -d
+
+# View logs
+docker compose logs -f
 ```
 
 Server starts on `http://localhost:11436` by default.
