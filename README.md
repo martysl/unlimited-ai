@@ -1,6 +1,6 @@
-# Puter Local Model Emulator
+# Puter API
 
-A Pinokio app that provides a local OpenAI-compatible HTTP endpoint backed by Puter AI. Access 500+ AI models through Puter's free API using standard OpenAI formats for chat, TTS, image generation, transcription, and embeddings.
+A docker and pinokio app that provides a local OpenAI-compatible HTTP endpoint backed by Puter AI. Access 500+ AI models through Puter's free API using standard OpenAI formats for chat, TTS, image generation, transcription, and embeddings.
 
 ## What is this?
 
