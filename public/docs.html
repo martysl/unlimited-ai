@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unlimited AI — API Docs</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #242836;
+      --border: #2e3345;
+      --text: #e2e4eb;
+      --text-dim: #8b8fa3;
+      --accent: #7c6aef;
+      --accent-hover: #9585ff;
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --orange: #fb923c;
+      --radius: 10px;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1a1d27 0%, #2a1f4e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7c6aef, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+    }
+    .header p { color: var(--text-dim); font-size: 0.95rem; }
+
+    /* Layout */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Nav */
+    .nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      padding: 0.75rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .nav a:hover { background: var(--surface2); color: var(--text); }
+
+    /* Section */
+    .section {
+      margin-bottom: 2.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .method {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .method.get { background: rgba(74, 222, 128, 0.15); color: var(--green); }
+    .method.post { background: rgba(124, 106, 239, 0.15); color: var(--accent); }
+
+    .section-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+    .section-header .desc {
+      margin-left: auto;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    .section-body { padding: 1.5rem; }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 0.6rem 0.75rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .form-group input[type="file"] {
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* Response */
+    .response-area {
+      margin-top: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    .status-badge {
+      font-family: var(--mono);
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+    }
+    .status-badge.success { background: rgba(74, 222, 128, 0.15); color: var(--green); }
+    .status-badge.error { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+    .response-body {
+      padding: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+    }
+    .response-body.streaming {
+      color: var(--green);
+    }
+
+    /* API Key Bar */
+    .api-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .api-bar label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+    .api-bar input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+      outline: none;
+    }
+    .api-bar input:focus { border-color: var(--accent); }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .section-header { flex-wrap: wrap; }
+      .section-header .desc { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Unlimited AI</h1>
+  <p>OpenAI-compatible API &mdash; backed by Puter AI &mdash; interactive docs</p>
+</div>
+
+<div class="container">
+
+  <!-- API Key -->
+  <div class="api-bar">
+    <label>API Key</label>
+    <input type="password" id="apiKey" value="sk-puter-123" placeholder="sk-puter-123">
+    <button class="btn btn-sm btn-primary" onclick="toggleKeyVisibility()">Show</button>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <a href="#models">Models</a>
+    <a href="#chat">Chat</a>
+    <a href="#chat-stream">Chat (Stream)</a>
+    <a href="#speech">TTS</a>
+    <a href="#images">Images</a>
+    <a href="#transcribe">Transcribe</a>
+    <a href="#embeddings">Embeddings</a>
+  </div>
+
+  <!-- GET /v1/models -->
+  <div class="section" id="models">
+    <div class="section-header">
+      <span class="method get">GET</span>
+      <h2>/v1/models</h2>
+      <span class="desc">List available models</span>
+    </div>
+    <div class="section-body">
+      <button class="btn btn-primary" onclick="fetchModels()">Send Request</button>
+      <div class="response-area" id="models-response" style="display:none">
+        <div class="response-header">
+          <span>Response</span>
+          <span class="status-badge" id="models-status"></span>
+        </div>
+        <div class="response-body" id="models-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /v1/chat/completions -->
+  <div class="section" id="chat">
+    <div class="section-header">
+      <span class="method post">POST</span>
+      <h2>/v1/chat/completions</h2>
+      <span class="desc">Chat completion</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="chat-model" value="gpt-4o" placeholder="gpt-4o">
+        </div>
+        <div class="form-group">
+          <label>Temperature</label>
+          <input type="number" id="chat-temp" value="0.7" min="0" max="2" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Max Tokens</label>
+          <input type="number" id="chat-max" value="500" min="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Messages (JSON array)</label>
+        <textarea id="chat-messages">[
+  { "role": "system", "content": "You are a helpful assistant." },
+  { "role": "user", "content": "Explain quantum computing in one sentence." }
+]</textarea>
+      </div>
+      <button class="btn btn-primary" onclick="sendChat()">Send Request</button>
+      <div class="response-area" id="chat-response" style="display:none">
+        <div class="response-header">
+          <span>Response</span>
+          <span class="status-badge" id="chat-status"></span>
+        </div>
+        <div class="response-body" id="chat-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /v1/chat/completions (streaming) -->
+  <div class="section" id="chat-stream">
+    <div class="section-header">
+      <span class="method post">POST</span>
+      <h2>/v1/chat/completions</h2>
+      <span class="desc">Streaming chat</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="stream-model" value="gpt-4o" placeholder="gpt-4o">
+        </div>
+        <div class="form-group">
+          <label>Temperature</label>
+          <input type="number" id="stream-temp" value="0.7" min="0" max="2" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Max Tokens</label>
+          <input type="number" id="stream-max" value="500" min="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Messages (JSON array)</label>
+        <textarea id="stream-messages">[
+  { "role": "user", "content": "Write a short haiku about the ocean." }
+]</textarea>
+      </div>
+      <button class="btn btn-primary" id="stream-btn" onclick="sendStreamChat()">Stream Request</button>
+      <div class="response-area" id="stream-response" style="display:none">
+        <div class="response-header">
+          <span>Streaming Response</span>
+          <span class="status-badge" id="stream-status"></span>
+        </div>
+        <div class="response-body streaming" id="stream-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /v1/audio/speech -->
+  <div class="section" id="speech">
+    <div class="section-header">
+      <span class="method post">POST</span>
+      <h2>/v1/audio/speech</h2>
+      <span class="desc">Text-to-speech</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="tts-model" value="aws-polly" placeholder="aws-polly">
+        </div>
+        <div class="form-group">
+          <label>Voice</label>
+          <input type="text" id="tts-voice" value="Joanna" placeholder="Joanna">
+        </div>
+        <div class="form-group">
+          <label>Format</label>
+          <select id="tts-format">
+            <option value="mp3">mp3</option>
+            <option value="opus">opus</option>
+            <option value="aac">aac</option>
+            <option value="flac">flac</option>
+            <option value="wav">wav</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Input Text</label>
+        <textarea id="tts-input" style="min-height:80px">Hello! Welcome to the Unlimited AI API. This is a text-to-speech demo.</textarea>
+      </div>
+      <button class="btn btn-primary" onclick="sendTTS()">Generate Speech</button>
+      <div class="response-area" id="tts-response" style="display:none">
+        <div class="response-header">
+          <span>Response</span>
+          <span class="status-badge" id="tts-status"></span>
+        </div>
+        <div class="response-body" id="tts-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /v1/images/generations -->
+  <div class="section" id="images">
+    <div class="section-header">
+      <span class="method post">POST</span>
+      <h2>/v1/images/generations</h2>
+      <span class="desc">Image generation</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="img-model" value="gemini-2.5-flash-image-preview" placeholder="model">
+        </div>
+        <div class="form-group">
+          <label>Size</label>
+          <select id="img-size">
+            <option value="1024x1024">1024x1024</option>
+            <option value="1024x1792">1024x1792</option>
+            <option value="1792x1024">1792x1024</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Count</label>
+          <input type="number" id="img-n" value="1" min="1" max="4">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Prompt</label>
+        <textarea id="img-prompt" style="min-height:80px">A beautiful sunset over a calm ocean, photorealistic, golden hour lighting</textarea>
+      </div>
+      <button class="btn btn-primary" onclick="sendImageGen()">Generate Image</button>
+      <div class="response-area" id="img-response" style="display:none">
+        <div class="response-header">
+          <span>Response</span>
+          <span class="status-badge" id="img-status"></span>
+        </div>
+        <div class="response-body" id="img-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /v1/audio/transcriptions -->
+  <div class="section" id="transcribe">
+    <div class="section-header">
+      <span class="method post">POST</span>
+      <h2>/v1/audio/transcriptions</h2>
+      <span class="desc">Speech-to-text</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="trans-model" value="whisper-1" placeholder="whisper-1">
+        </div>
+        <div class="form-group">
+          <label>Language</label>
+          <input type="text" id="trans-lang" value="" placeholder="auto-detect">
+        </div>
+        <div class="form-group">
+          <label>Response Format</label>
+          <select id="trans-format">
+            <option value="json">json</option>
+            <option value="text">text</option>
+            <option value="verbose_json">verbose_json</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Audio File</label>
+        <input type="file" id="trans-file" accept="audio/*">
+      </div>
+      <button class="btn btn-primary" onclick="sendTranscription()">Transcribe</button>
+      <div class="response-area" id="trans-response" style="display:none">
+        <div class="response-header">
+          <span>Response</span>
+          <span class="status-badge" id="trans-status"></span>
+        </div>
+        <div class="response-body" id="trans-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /v1/embeddings -->
+  <div class="section" id="embeddings">
+    <div class="section-header">
+      <span class="method post">POST</span>
+      <h2>/v1/embeddings</h2>
+      <span class="desc">Text embeddings</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="emb-model" value="text-embedding-ada-002" placeholder="text-embedding-ada-002">
+        </div>
+        <div class="form-group">
+          <label>Encoding Format</label>
+          <select id="emb-format">
+            <option value="float">float</option>
+            <option value="base64">base64</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Input (text or JSON array of texts)</label>
+        <textarea id="emb-input" style="min-height:80px">The quick brown fox jumps over the lazy dog.</textarea>
+      </div>
+      <button class="btn btn-primary" onclick="sendEmbeddings()">Generate Embeddings</button>
+      <div class="response-area" id="emb-response" style="display:none">
+        <div class="response-header">
+          <span>Response</span>
+          <span class="status-badge" id="emb-status"></span>
+        </div>
+        <div class="response-body" id="emb-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Updated and Tested by Tasia with &lt;3 &mdash; Unlimited AI API
+  </div>
+
+</div>
+
+<script>
+  const BASE = window.location.origin;
+
+  function getApiKey() {
+    return document.getElementById('apiKey').value.trim();
+  }
+
+  function headers() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + getApiKey()
+    };
+  }
+
+  function showResponse(containerId, statusId, bodyId, status, body, isJson = true) {
+    const container = document.getElementById(containerId);
+    const statusEl = document.getElementById(statusId);
+    const bodyEl = document.getElementById(bodyId);
+
+    container.style.display = 'block';
+    statusEl.textContent = status;
+    statusEl.className = 'status-badge ' + (status >= 200 && status < 300 ? 'success' : 'error');
+
+    if (isJson && typeof body === 'object') {
+      bodyEl.textContent = JSON.stringify(body, null, 2);
+    } else {
+      bodyEl.textContent = body;
+    }
+  }
+
+  function toggleKeyVisibility() {
+    const input = document.getElementById('apiKey');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  // GET /v1/models
+  async function fetchModels() {
+    try {
+      const res = await fetch(BASE + '/v1/models', { headers: headers() });
+      const data = await res.json();
+      showResponse('models-response', 'models-status', 'models-body', res.status, data);
+    } catch (e) {
+      showResponse('models-response', 'models-status', 'models-body', 0, e.message, false);
+    }
+  }
+
+  // POST /v1/chat/completions
+  async function sendChat() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Sending...';
+
+    let messages;
+    try {
+      messages = JSON.parse(document.getElementById('chat-messages').value);
+    } catch (e) {
+      showResponse('chat-response', 'chat-status', 'chat-body', 400, { error: 'Invalid JSON in messages' });
+      btn.disabled = false;
+      btn.textContent = 'Send Request';
+      return;
+    }
+
+    const body = {
+      model: document.getElementById('chat-model').value,
+      messages,
+      temperature: parseFloat(document.getElementById('chat-temp').value),
+      max_tokens: parseInt(document.getElementById('chat-max').value)
+    };
+
+    try {
+      const res = await fetch(BASE + '/v1/chat/completions', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      showResponse('chat-response', 'chat-status', 'chat-body', res.status, data);
+    } catch (e) {
+      showResponse('chat-response', 'chat-status', 'chat-body', 0, e.message, false);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send Request';
+  }
+
+  // POST /v1/chat/completions (streaming)
+  async function sendStreamChat() {
+    const btn = document.getElementById('stream-btn');
+    const bodyEl = document.getElementById('stream-body');
+    const container = document.getElementById('stream-response');
+    const statusEl = document.getElementById('stream-status');
+
+    let messages;
+    try {
+      messages = JSON.parse(document.getElementById('stream-messages').value);
+    } catch (e) {
+      showResponse('stream-response', 'stream-status', 'stream-body', 400, { error: 'Invalid JSON in messages' });
+      return;
+    }
+
+    const body = {
+      model: document.getElementById('stream-model').value,
+      messages,
+      temperature: parseFloat(document.getElementById('stream-temp').value),
+      max_tokens: parseInt(document.getElementById('stream-max').value),
+      stream: true
+    };
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Streaming...';
+    container.style.display = 'block';
+    bodyEl.textContent = '';
+    statusEl.textContent = 'streaming...';
+    statusEl.className = 'status-badge';
+
+    try {
+      const res = await fetch(BASE + '/v1/chat/completions', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(body)
+      });
+
+      statusEl.textContent = res.status;
+      statusEl.className = 'status-badge ' + (res.status >= 200 && res.status < 300 ? 'success' : 'error');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              bodyEl.textContent += '\n\n[DONE]';
+              continue;
+            }
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || '';
+              if (content) bodyEl.textContent += content;
+            } catch (_) {}
+          }
+        }
+
+        bodyEl.scrollTop = bodyEl.scrollHeight;
+      }
+    } catch (e) {
+      bodyEl.textContent = 'Error: ' + e.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Stream Request';
+  }
+
+  // POST /v1/audio/speech
+  async function sendTTS() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Generating...';
+
+    const body = {
+      model: document.getElementById('tts-model').value,
+      input: document.getElementById('tts-input').value,
+      voice: document.getElementById('tts-voice').value,
+      response_format: document.getElementById('tts-format').value
+    };
+
+    try {
+      const res = await fetch(BASE + '/v1/audio/speech', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audioHtml = `<audio controls autoplay src="${url}" style="width:100%;margin-bottom:0.5rem"></audio>
+          <div style="font-size:0.75rem;color:var(--text-dim)">${blob.type} — ${(blob.size / 1024).toFixed(1)} KB</div>`;
+        showResponse('tts-response', 'tts-status', 'tts-body', res.status, audioHtml, false);
+      } else {
+        const data = await res.json();
+        showResponse('tts-response', 'tts-status', 'tts-body', res.status, data);
+      }
+    } catch (e) {
+      showResponse('tts-response', 'tts-status', 'tts-body', 0, e.message, false);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Generate Speech';
+  }
+
+  // POST /v1/images/generations
+  async function sendImageGen() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Generating...';
+
+    const body = {
+      prompt: document.getElementById('img-prompt').value,
+      model: document.getElementById('img-model').value,
+      size: document.getElementById('img-size').value,
+      n: parseInt(document.getElementById('img-n').value)
+    };
+
+    try {
+      const res = await fetch(BASE + '/v1/images/generations', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (res.ok && data.data) {
+        let html = '';
+        for (const img of data.data) {
+          if (img.url) {
+            html += `<img src="${img.url}" style="max-width:100%;border-radius:6px;margin-bottom:0.5rem" alt="Generated image">\n`;
+          }
+          if (img.b64_json) {
+            html += `<img src="data:image/png;base64,${img.b64_json}" style="max-width:100%;border-radius:6px;margin-bottom:0.5rem" alt="Generated image">\n`;
+          }
+        }
+        html += `\n${JSON.stringify(data, null, 2)}`;
+        showResponse('img-response', 'img-status', 'img-body', res.status, html, false);
+      } else {
+        showResponse('img-response', 'img-status', 'img-body', res.status, data);
+      }
+    } catch (e) {
+      showResponse('img-response', 'img-status', 'img-body', 0, e.message, false);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Generate Image';
+  }
+
+  // POST /v1/audio/transcriptions
+  async function sendTranscription() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Transcribing...';
+
+    const fileInput = document.getElementById('trans-file');
+    if (!fileInput.files.length) {
+      showResponse('trans-response', 'trans-status', 'trans-body', 400, { error: 'Please select an audio file' });
+      btn.disabled = false;
+      btn.textContent = 'Transcribe';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    const model = document.getElementById('trans-model').value;
+    const lang = document.getElementById('trans-lang').value;
+    const format = document.getElementById('trans-format').value;
+
+    if (model) formData.append('model', model);
+    if (lang) formData.append('language', lang);
+    if (format) formData.append('response_format', format);
+
+    try {
+      const res = await fetch(BASE + '/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + getApiKey() },
+        body: formData
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('text/plain')) {
+        const text = await res.text();
+        showResponse('trans-response', 'trans-status', 'trans-body', res.status, text, false);
+      } else {
+        const data = await res.json();
+        showResponse('trans-response', 'trans-status', 'trans-body', res.status, data);
+      }
+    } catch (e) {
+      showResponse('trans-response', 'trans-status', 'trans-body', 0, e.message, false);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Transcribe';
+  }
+
+  // POST /v1/embeddings
+  async function sendEmbeddings() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Generating...';
+
+    let input;
+    try {
+      input = JSON.parse(document.getElementById('emb-input').value);
+    } catch (_) {
+      input = document.getElementById('emb-input').value;
+    }
+
+    const body = {
+      input,
+      model: document.getElementById('emb-model').value,
+      encoding_format: document.getElementById('emb-format').value
+    };
+
+    try {
+      const res = await fetch(BASE + '/v1/embeddings', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      // Truncate embedding vectors for display
+      if (data.data) {
+        const display = JSON.parse(JSON.stringify(data));
+        for (const item of display.data) {
+          if (Array.isArray(item.embedding) && item.embedding.length > 20) {
+            item.embedding = item.embedding.slice(0, 20);
+            item.embedding_truncated = true;
+            item.embedding_dimensions = data.data.find(d => d.index === item.index)?.embedding?.length || 0;
+          }
+        }
+        showResponse('emb-response', 'emb-status', 'emb-body', res.status, display);
+      } else {
+        showResponse('emb-response', 'emb-status', 'emb-body', res.status, data);
+      }
+    } catch (e) {
+      showResponse('emb-response', 'emb-status', 'emb-body', 0, e.message, false);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Generate Embeddings';
+  }
+</script>
+
+</body>
+</html>

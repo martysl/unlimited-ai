@@ -1,0 +1,19 @@
+{
+  "port": 11436,
+  "backend": "puter",
+  "apiKey": "sk-puter-123",
+  "puterModel": "gpt-4o",
+  "spoofedOpenAIModelId": "gpt-4o-mini",
+  "defaultModel": "gpt-4o",
+  "modelAliases": {},
+  "modelAllowlist": [],
+  "modelBlocklist": [],
+  "enabled": true,
+  "emulatorActive": false,
+  "lastConfig": null,
+  "logging": {
+    "enabled": true,
+    "logRequests": true,
+    "logErrors": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "run": [
+    {
+      "method": "net.request",
+      "params": {
+        "url": "http://localhost:11436/health",
+        "method": "GET"
+      }
+    },
+    {
+      "method": "log",
+      "params": {
+        "json2": "{{input}}"
+      }
+    }
+  ]
+}
