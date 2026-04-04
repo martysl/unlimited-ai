@@ -614,6 +614,34 @@ app.post('/models/test', requireConfigAuth, async (req, res) => {
   }
 });
 
+// POST /models/test-all — Test all Puter models sequentially, returns results
+app.post('/models/test-all', requireConfigAuth, async (req, res) => {
+  try {
+    const { chat } = require('./puter-client');
+    const cache = getModelsCache();
+    const allModels = cache.models || [];
+    const results = [];
+    let passed = 0;
+    let failed = 0;
+
+    for (const m of allModels) {
+      const modelId = typeof m === 'string' ? m : m.id;
+      try {
+        const result = await chat('Say "ok"', { model: modelId });
+        results.push({ model: modelId, status: 'ok', response: (result.text || '').substring(0, 100) });
+        passed++;
+      } catch (error) {
+        results.push({ model: modelId, status: 'error', error: error.message || 'Failed' });
+        failed++;
+      }
+    }
+
+    res.json({ total: allModels.length, passed, failed, results });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'Test all failed' });
+  }
+});
+
 // Shutdown endpoint
 app.post('/shutdown', (req, res) => {
   logInfo('Shutdown requested from UI');

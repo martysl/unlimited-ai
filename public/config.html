@@ -133,6 +133,11 @@
     .puter-model-item .test-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .puter-model-item .test-btn.testing { animation: pulse 1s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .puter-model-item.test-ok { border-left: 3px solid var(--online-dot); }
+    .puter-model-item.test-error { border-left: 3px solid var(--offline-dot); }
+    .puter-model-item .test-result { font-size: 12px; padding: 2px 8px; border-radius: 6px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .test-result.ok { background: var(--online-bg); color: var(--online-text); }
+    .test-result.error { background: var(--offline-bg); color: var(--offline-text); }
 
     /* Search input */
     .search-input { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; margin-bottom: 10px; background: var(--input-bg); color: var(--text); }
@@ -209,9 +214,21 @@
     <div class="section puter-models-section">
       <div class="puter-models-header">
         <h2>Available Puter Models</h2>
-        <button id="refresh-models-btn" class="secondary" style="font-size:12px;padding:8px 12px;">Refresh</button>
+        <div style="display:flex;gap:8px;">
+          <button id="test-all-btn" class="secondary" style="font-size:12px;padding:8px 12px;">Test All</button>
+          <button id="refresh-models-btn" class="secondary" style="font-size:12px;padding:8px 12px;">Refresh</button>
+        </div>
       </div>
       <input type="text" id="puter-models-search" class="search-input" placeholder="Search models...">
+      <div id="test-all-progress" class="hidden" style="padding:10px 14px;background:var(--model-bg);border:1px solid var(--border-light);border-radius:10px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="test-all-status" class="muted">Testing...</span>
+          <button id="test-all-cancel" class="danger" style="font-size:11px;padding:4px 10px;">Cancel</button>
+        </div>
+        <div style="margin-top:8px;height:6px;background:var(--border-light);border-radius:3px;overflow:hidden;">
+          <div id="test-all-bar" style="height:100%;width:0%;background:var(--primary);border-radius:3px;transition:width 0.2s;"></div>
+        </div>
+      </div>
       <ul id="puter-models-list" class="puter-models-list"></ul>
     </div>
 
@@ -256,6 +273,11 @@
     const puterTokenInput = document.getElementById('puter-token-input');
     const savePuterTokenBtn = document.getElementById('save-puter-token-btn');
     const togglePuterTokenBtn = document.getElementById('toggle-puter-token-btn');
+    const testAllBtn = document.getElementById('test-all-btn');
+    const testAllProgress = document.getElementById('test-all-progress');
+    const testAllBar = document.getElementById('test-all-bar');
+    const testAllStatus = document.getElementById('test-all-status');
+    const testAllCancel = document.getElementById('test-all-cancel');
 
     // -----------------------------------------------------------------------
     // Theme
@@ -286,6 +308,9 @@
     let models = [];
     let customModels = [];
     let currentApiKey = '';
+    let testResults = {};
+    let testAllRunning = false;
+    let testAllCancelled = false;
 
     function setMessage(text) {
       statusMessage.textContent = text || '';
@@ -360,9 +385,22 @@
         li.className = 'puter-model-item';
         const alreadyAdded = customModels.some(cm => cm.puterModel === m.id);
         const safeId = escHtml(m.id).replace(/'/g, "\\'");
+        const testResult = testResults[m.id];
+
+        let testBadge = '';
+        if (testResult) {
+          const cls = testResult.status === 'ok' ? 'ok' : 'error';
+          const text = testResult.status === 'ok' ? '✓' : '✗';
+          testBadge = `<span class="test-result ${cls}" title="${escHtml(testResult.status === 'ok' ? testResult.response : testResult.error)}">${text}</span>`;
+        }
+
+        if (testResult?.status === 'ok') li.classList.add('test-ok');
+        if (testResult?.status === 'error') li.classList.add('test-error');
+
         li.innerHTML = `
           <span class="pm-name">${escHtml(m.id)}</span>
           ${m.label ? `<span class="pm-label">${escHtml(m.label)}</span>` : ''}
+          ${testBadge}
           ${alreadyAdded
             ? `<span class="pm-added">✓ Added</span>`
             : `<button class="add-btn" onclick="addFromPuter('${safeId}')">Add</button>`
@@ -610,12 +648,67 @@
     }
 
     // -----------------------------------------------------------------------
+    // Test All
+    // -----------------------------------------------------------------------
+
+    async function testAllModels() {
+      if (testAllRunning) return;
+      testAllRunning = true;
+      testAllCancelled = false;
+      testResults = {};
+
+      testAllBtn.disabled = true;
+      testAllProgress.classList.remove('hidden');
+      testAllBar.style.width = '0%';
+      testAllStatus.textContent = 'Starting...';
+
+      try {
+        const res = await authFetch('/models/test-all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.results) {
+          for (const r of data.results) {
+            if (testAllCancelled) break;
+            testResults[r.model] = { status: r.status, response: r.response || '', error: r.error || '' };
+            const done = Object.keys(testResults).length;
+            const pct = Math.round((done / data.total) * 100);
+            testAllBar.style.width = pct + '%';
+            testAllStatus.textContent = `Testing... ${done}/${data.total} (${pct}%) — ✓ ${data.passed} ✗ ${data.failed}`;
+            renderPuterModels();
+          }
+        }
+
+        testAllStatus.textContent = `Done: ${data.passed} passed, ${data.failed} failed of ${data.total}`;
+        setMessage(`Test complete: ${data.passed} passed, ${data.failed} failed`);
+      } catch (err) {
+        testAllStatus.textContent = 'Failed: ' + err.message;
+        setMessage(err.message);
+      } finally {
+        testAllRunning = false;
+        testAllBtn.disabled = false;
+        setTimeout(() => testAllProgress.classList.add('hidden'), 3000);
+      }
+    }
+
+    testAllCancel.addEventListener('click', () => {
+      testAllCancelled = true;
+      testAllStatus.textContent = 'Cancelled.';
+      testAllRunning = false;
+      testAllBtn.disabled = false;
+      setTimeout(() => testAllProgress.classList.add('hidden'), 2000);
+    });
+
+    // -----------------------------------------------------------------------
     // Event listeners
     // -----------------------------------------------------------------------
 
     refreshHealthBtn.addEventListener('click', refreshHealth);
     refreshModelsBtn.addEventListener('click', () => refreshModels(true));
     puterModelsSearch.addEventListener('input', renderPuterModels);
+    testAllBtn.addEventListener('click', testAllModels);
     saveApiKeyBtn.addEventListener('click', saveApiKey);
     copyApiKeyBtn.addEventListener('click', copyApiKey);
     saveConfigKeyBtn.addEventListener('click', saveConfigKey);
