@@ -5,45 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Puter Model Emulator</title>
   <style>
+    :root {
+      --bg: #f4f6f8;
+      --card-bg: #fff;
+      --text: #1f2933;
+      --text-muted: #627384;
+      --border: #d9e1ec;
+      --border-light: #e5ecf3;
+      --input-bg: #fff;
+      --hover: #f3f7ff;
+      --hover-list: #f8fafd;
+      --primary: #4a9eff;
+      --primary-text: #fff;
+      --secondary: #eef2f7;
+      --secondary-text: #1f2933;
+      --danger: #e35d6a;
+      --danger-text: #fff;
+      --online-bg: #e8f7ef;
+      --online-text: #1b6e34;
+      --online-dot: #22c55e;
+      --offline-bg: #fdf2f2;
+      --offline-text: #b42318;
+      --offline-dot: #f75555;
+      --status-bg: #f8fafc;
+      --model-bg: #fafcfe;
+      --shadow: rgba(0,0,0,0.06);
+      --shadow-lg: rgba(0,0,0,0.08);
+      --focus-ring: rgba(74,158,255,0.15);
+      --dropdown-bg: #fff;
+      --login-bg: #f4f6f8;
+      --login-box: #fff;
+      --added-color: #22c55e;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f1117;
+      --card-bg: #1a1d27;
+      --text: #e4e6eb;
+      --text-muted: #8b95a5;
+      --border: #2a2f3a;
+      --border-light: #2a2f3a;
+      --input-bg: #151820;
+      --hover: #1e2330;
+      --hover-list: #1e2330;
+      --primary: #4a9eff;
+      --primary-text: #fff;
+      --secondary: #2a2f3a;
+      --secondary-text: #e4e6eb;
+      --danger: #e35d6a;
+      --danger-text: #fff;
+      --online-bg: #0d3320;
+      --online-text: #4ade80;
+      --online-dot: #22c55e;
+      --offline-bg: #3b1010;
+      --offline-text: #f87171;
+      --offline-dot: #f75555;
+      --status-bg: #151820;
+      --model-bg: #151820;
+      --shadow: rgba(0,0,0,0.3);
+      --shadow-lg: rgba(0,0,0,0.4);
+      --focus-ring: rgba(74,158,255,0.25);
+      --dropdown-bg: #1a1d27;
+      --login-bg: #0f1117;
+      --login-box: #1a1d27;
+      --added-color: #4ade80;
+    }
+
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #1f2933; }
-    .container { max-width: 840px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 28px; box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); transition: background 0.2s, color 0.2s; }
+    .container { max-width: 840px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; padding: 28px; box-shadow: 0 12px 40px var(--shadow); transition: background 0.2s; }
     h1 { margin: 0 0 6px; font-size: 24px; }
     h2 { margin: 0 0 12px; font-size: 18px; }
-    .muted { color: #627384; font-size: 14px; margin: 0; }
+    .muted { color: var(--text-muted); font-size: 14px; margin: 0; }
     .section { margin-top: 18px; }
     label { display: block; font-weight: 600; margin-bottom: 6px; }
-    input[type="text"], select { width: 100%; padding: 11px 12px; border: 1px solid #d9e1ec; border-radius: 10px; font-size: 14px; }
-    input:focus, select:focus { outline: none; border-color: #4a9eff; box-shadow: 0 0 0 3px rgba(74,158,255,0.15); }
+    input[type="text"], select { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: var(--text); }
+    input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus-ring); }
     .search-dropdown { position: relative; width: 100%; }
-    .dropdown-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #d9e1ec; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); max-height: 260px; overflow-y: auto; padding: 6px 0; z-index: 10; display: none; }
+    .dropdown-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--dropdown-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 20px var(--shadow); max-height: 260px; overflow-y: auto; padding: 6px 0; z-index: 10; display: none; }
     .dropdown-menu.open { display: block; }
     .dropdown-item { padding: 10px 12px; cursor: pointer; font-size: 14px; }
-    .dropdown-item:hover { background: #f3f7ff; }
+    .dropdown-item:hover { background: var(--hover); }
     .row { display: flex; gap: 10px; align-items: center; }
     .row > *:first-child { flex: 1; }
     button { border: none; border-radius: 10px; padding: 11px 16px; font-weight: 600; cursor: pointer; font-size: 14px; }
-    .primary { background: #4a9eff; color: white; }
-    .secondary { background: #eef2f7; color: #1f2933; }
-    .danger { background: #e35d6a; color: white; }
+    .primary { background: var(--primary); color: var(--primary-text); }
+    .secondary { background: var(--secondary); color: var(--secondary-text); }
+    .danger { background: var(--danger); color: var(--danger-text); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .endpoint { background: #f3f7ff; border: 1px solid #d9e7ff; padding: 12px 14px; border-radius: 10px; font-family: monospace; font-size: 13px; word-break: break-all; }
-    .status-bar { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e5ecf3; border-radius: 10px; margin-top: 22px; }
+    .endpoint { background: var(--hover); border: 1px solid var(--border); padding: 12px 14px; border-radius: 10px; font-family: monospace; font-size: 13px; word-break: break-all; }
+    .status-bar { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--status-bg); border: 1px solid var(--border-light); border-radius: 10px; margin-top: 22px; }
     .indicator { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-weight: 600; }
     .indicator .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .online { background: #e8f7ef; color: #1b6e34; }
-    .online .dot { background: #22c55e; }
-    .offline { background: #fdf2f2; color: #b42318; }
-    .offline .dot { background: #f75555; }
-    .icon-button { background: #eef2f7; color: #1f2933; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
-    .message { flex: 1; color: #1f2933; font-size: 13px; min-height: 18px; }
+    .online { background: var(--online-bg); color: var(--online-text); }
+    .online .dot { background: var(--online-dot); }
+    .offline { background: var(--offline-bg); color: var(--offline-text); }
+    .offline .dot { background: var(--offline-dot); }
+    .icon-button { background: var(--secondary); color: var(--secondary-text); width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
+    .message { flex: 1; color: var(--text); font-size: 13px; min-height: 18px; }
+
+    /* Theme toggle */
+    .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 50; background: var(--card-bg); border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; box-shadow: 0 4px 12px var(--shadow); }
 
     /* Custom model list */
     .model-list { list-style: none; padding: 0; margin: 0; }
-    .model-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #e5ecf3; border-radius: 10px; margin-bottom: 8px; background: #fafcfe; }
+    .model-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 8px; background: var(--model-bg); }
     .model-item .model-name { font-weight: 600; min-width: 140px; }
-    .model-item .model-arrow { color: #627384; font-size: 13px; }
-    .model-item .model-puter { color: #4a9eff; font-size: 13px; }
+    .model-item .model-arrow { color: var(--text-muted); font-size: 13px; }
+    .model-item .model-puter { color: var(--primary); font-size: 13px; }
     .model-item .model-actions { margin-left: auto; display: flex; gap: 6px; }
     .model-item .model-actions button { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
 
@@ -51,29 +120,29 @@
     .puter-models-section { margin-top: 18px; }
     .puter-models-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .puter-models-header h2 { margin: 0; }
-    .puter-models-list { list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; border: 1px solid #e5ecf3; border-radius: 10px; }
-    .puter-model-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f0f3f8; cursor: default; }
+    .puter-models-list { list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 10px; }
+    .puter-model-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-light); cursor: default; }
     .puter-model-item:last-child { border-bottom: none; }
-    .puter-model-item:hover { background: #f8fafd; }
+    .puter-model-item:hover { background: var(--hover-list); }
     .puter-model-item .pm-name { font-weight: 600; flex: 1; font-size: 14px; }
-    .puter-model-item .pm-label { color: #627384; font-size: 13px; flex: 1; }
-    .puter-model-item .pm-added { color: #22c55e; font-size: 13px; font-weight: 600; }
-    .puter-model-item .add-btn { background: #4a9eff; color: white; padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+    .puter-model-item .pm-label { color: var(--text-muted); font-size: 13px; flex: 1; }
+    .puter-model-item .pm-added { color: var(--added-color); font-size: 13px; font-weight: 600; }
+    .puter-model-item .add-btn { background: var(--primary); color: white; padding: 6px 14px; font-size: 12px; border-radius: 8px; }
     .puter-model-item .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* Search input */
-    .search-input { width: 100%; padding: 11px 12px; border: 1px solid #d9e1ec; border-radius: 10px; font-size: 14px; margin-bottom: 10px; }
-    .search-input:focus { outline: none; border-color: #4a9eff; box-shadow: 0 0 0 3px rgba(74,158,255,0.15); }
+    .search-input { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; margin-bottom: 10px; background: var(--input-bg); color: var(--text); }
+    .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus-ring); }
 
     /* Key row */
     .key-row { display: flex; gap: 10px; align-items: center; }
     .key-row input { flex: 1; font-family: monospace; }
     .key-row button { white-space: nowrap; }
-    .copy-btn { background: #eef2f7; color: #1f2933; padding: 11px 14px; }
+    .copy-btn { background: var(--secondary); color: var(--secondary-text); padding: 11px 14px; }
 
     /* Login screen */
-    .login-overlay { position: fixed; inset: 0; background: #f4f6f8; display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .login-box { background: #fff; border-radius: 12px; padding: 36px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); max-width: 400px; width: 100%; text-align: center; }
+    .login-overlay { position: fixed; inset: 0; background: var(--login-bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .login-box { background: var(--login-box); border-radius: 12px; padding: 36px; box-shadow: 0 12px 40px var(--shadow-lg); max-width: 400px; width: 100%; text-align: center; }
     .login-box h1 { margin-bottom: 8px; }
     .login-box .muted { margin-bottom: 24px; }
     .login-box input { margin-bottom: 16px; }
@@ -82,6 +151,9 @@
   </style>
 </head>
 <body>
+  <!-- Theme toggle -->
+  <div id="theme-toggle" class="theme-toggle" title="Toggle dark mode">🌙</div>
+
   <!-- Login overlay -->
   <div id="login-overlay" class="login-overlay">
     <div class="login-box">
@@ -166,6 +238,31 @@
     const customModelListEl = document.getElementById('custom-model-list');
     const puterModelsListEl = document.getElementById('puter-models-list');
     const puterModelsSearch = document.getElementById('puter-models-search');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // -----------------------------------------------------------------------
+    // Theme
+    // -----------------------------------------------------------------------
+
+    function setTheme(dark) {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      themeToggle.textContent = dark ? '☀️' : '🌙';
+      try { localStorage.setItem('puter-emulator-theme', dark ? 'dark' : 'light'); } catch {}
+    }
+
+    // Restore saved theme
+    (function() {
+      try {
+        const saved = localStorage.getItem('puter-emulator-theme');
+        if (saved === 'dark') setTheme(true);
+        else setTheme(false);
+      } catch { setTheme(false); }
+    })();
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(!isDark);
+    });
 
     let configAuthKey = '';
     let puterOnline = false;
