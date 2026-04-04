@@ -472,11 +472,12 @@ app.get('/config/state', async (req, res) => {
 });
 
 app.post('/config/save', (req, res) => {
-  const { puterModelId, spoofedOpenAIModelId, port } = req.body;
+  const { puterModelId, spoofedOpenAIModelId, port, apiKey } = req.body;
   const updates = {};
   if (puterModelId !== undefined) updates.puterModel = puterModelId;
   if (spoofedOpenAIModelId !== undefined) updates.spoofedOpenAIModelId = spoofedOpenAIModelId;
   if (port !== undefined) updates.port = parseInt(port, 10);
+  if (apiKey !== undefined) updates.apiKey = apiKey;
 
   const success = updateConfig(updates);
   if (success) {
