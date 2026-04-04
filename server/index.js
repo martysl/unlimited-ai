@@ -555,7 +555,8 @@ function startServer() {
   const config = getConfig();
   const port = process.env.PORT || config.port || 11436;
 
-  const server = app.listen(port, '127.0.0.1', () => {
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+  const server = app.listen(port, host, () => {
     logInfo(`Puter Local Model Emulator started on http://localhost:${port}`);
     logInfo(`OpenAI endpoint: ${buildEndpoint()}`);
     logInfo(`API Key: ${config.apiKey || 'sk-puter-123'}`);
