@@ -47,10 +47,19 @@
     .model-item .model-actions { margin-left: auto; display: flex; gap: 6px; }
     .model-item .model-actions button { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
 
-    /* Add model form */
-    .add-model-form { display: flex; gap: 10px; align-items: flex-end; padding: 14px; background: #f3f7ff; border-radius: 10px; margin-top: 10px; }
-    .add-model-form .field { flex: 1; }
-    .add-model-form label { font-size: 13px; margin-bottom: 4px; }
+    /* Puter models list */
+    .puter-models-section { margin-top: 18px; }
+    .puter-models-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .puter-models-header h2 { margin: 0; }
+    .puter-models-list { list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; border: 1px solid #e5ecf3; border-radius: 10px; }
+    .puter-model-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f0f3f8; cursor: default; }
+    .puter-model-item:last-child { border-bottom: none; }
+    .puter-model-item:hover { background: #f8fafd; }
+    .puter-model-item .pm-name { font-weight: 600; flex: 1; font-size: 14px; }
+    .puter-model-item .pm-label { color: #627384; font-size: 13px; flex: 1; }
+    .puter-model-item .pm-added { color: #22c55e; font-size: 13px; font-weight: 600; }
+    .puter-model-item .add-btn { background: #4a9eff; color: white; padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+    .puter-model-item .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* Key row */
     .key-row { display: flex; gap: 10px; align-items: center; }
@@ -107,24 +116,18 @@
       </div>
     </div>
 
+    <div class="section puter-models-section">
+      <div class="puter-models-header">
+        <h2>Available Puter Models</h2>
+        <button id="refresh-models-btn" class="secondary" style="font-size:12px;padding:8px 12px;">Refresh</button>
+      </div>
+      <ul id="puter-models-list" class="puter-models-list"></ul>
+    </div>
+
     <div class="section">
       <h2>Custom Models</h2>
-      <p class="muted">Add models with your own names. All custom models are always active.</p>
-      <ul id="model-list" class="model-list"></ul>
-      <div class="add-model-form" id="add-model-form">
-        <div class="field">
-          <label>Your Model Name</label>
-          <input type="text" id="custom-model-name" placeholder="e.g. my-gpt-4o">
-        </div>
-        <div class="field">
-          <label>Puter Model</label>
-          <div class="search-dropdown">
-            <input type="text" id="custom-puter-model" autocomplete="off" placeholder="Select a Puter model...">
-            <div id="puter-models-list" class="dropdown-menu"></div>
-          </div>
-        </div>
-        <button id="add-model-btn" class="primary">Add</button>
-      </div>
+      <p class="muted">Models you've added with custom names. All are always active.</p>
+      <ul id="custom-model-list" class="model-list"></ul>
     </div>
 
     <div class="status-bar">
@@ -144,11 +147,6 @@
     const loginBtn = document.getElementById('login-btn');
     const loginError = document.getElementById('login-error');
 
-    const modelListEl = document.getElementById('model-list');
-    const customNameInput = document.getElementById('custom-model-name');
-    const puterModelInput = document.getElementById('custom-puter-model');
-    const puterModelList = document.getElementById('puter-models-list');
-    const addModelBtn = document.getElementById('add-model-btn');
     const indicatorEl = document.getElementById('puter-indicator');
     const indicatorText = indicatorEl.querySelector('.indicator-text');
     const refreshHealthBtn = document.getElementById('refresh-health');
@@ -159,6 +157,9 @@
     const configKeyInput = document.getElementById('config-key-input');
     const saveConfigKeyBtn = document.getElementById('save-configkey-btn');
     const copyConfigKeyBtn = document.getElementById('copy-configkey-btn');
+    const refreshModelsBtn = document.getElementById('refresh-models-btn');
+    const customModelListEl = document.getElementById('custom-model-list');
+    const puterModelsListEl = document.getElementById('puter-models-list');
 
     let configAuthKey = '';
     let puterOnline = false;
@@ -220,63 +221,60 @@
     loginKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryLogin(); });
 
     // -----------------------------------------------------------------------
-    // Puter model search dropdown
+    // Puter models list
     // -----------------------------------------------------------------------
 
-    function getFilteredModels(query = '') {
-      const lower = query.trim().toLowerCase();
-      if (!lower) return models;
-      return models.filter(m => (m.label || m.id).toLowerCase().includes(lower) || m.id.toLowerCase().includes(lower));
-    }
-
-    function renderDropdown(listEl, options, onSelect) {
-      listEl.innerHTML = '';
-      options.forEach(option => {
-        const item = document.createElement('div');
-        item.className = 'dropdown-item';
-        item.textContent = option.label || option.id;
-        item.addEventListener('click', () => { onSelect(option); listEl.classList.remove('open'); });
-        listEl.appendChild(item);
-      });
-      if (options.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'dropdown-item';
-        empty.textContent = 'No matches';
-        empty.style.color = '#627384';
-        empty.style.cursor = 'default';
-        listEl.appendChild(empty);
+    function renderPuterModels() {
+      puterModelsListEl.innerHTML = '';
+      if (models.length === 0) {
+        puterModelsListEl.innerHTML = '<li style="padding:16px;text-align:center;color:#627384;">No models loaded. Click Refresh.</li>';
+        return;
       }
-    }
-
-    function setupSearchDropdown(inputEl, listEl, getOptions, onSelect) {
-      let open = false;
-      function openMenu() { listEl.classList.add('open'); open = true; }
-      function closeMenu() { listEl.classList.remove('open'); open = false; }
-      function refreshOptions() { renderDropdown(listEl, getOptions(inputEl.value), onSelect); }
-      inputEl.addEventListener('input', () => { refreshOptions(); openMenu(); });
-      inputEl.addEventListener('click', (e) => {
-        if (open) closeMenu(); else { refreshOptions(); openMenu(); }
-        e.stopPropagation();
+      models.forEach(m => {
+        const li = document.createElement('li');
+        li.className = 'puter-model-item';
+        const alreadyAdded = customModels.some(cm => cm.puterModel === m.id);
+        li.innerHTML = `
+          <span class="pm-name">${escHtml(m.id)}</span>
+          ${m.label ? `<span class="pm-label">${escHtml(m.label)}</span>` : ''}
+          ${alreadyAdded
+            ? `<span class="pm-added">✓ Added</span>`
+            : `<button class="add-btn" onclick="addFromPuter('${escHtml(m.id).replace(/'/g, "\\'")}')">Add</button>`
+          }
+        `;
+        puterModelsListEl.appendChild(li);
       });
-      listEl.addEventListener('click', (e) => e.stopPropagation());
-      document.addEventListener('click', () => { if (open) closeMenu(); });
-      return { refreshOptions, closeMenu };
     }
 
-    const puterModelDropdown = setupSearchDropdown(
-      puterModelInput, puterModelList,
-      (q) => getFilteredModels(q),
-      (opt) => { puterModelInput.value = opt.id; }
-    );
+    window.addFromPuter = async function(puterModelId) {
+      const name = prompt('Custom name for this model:', puterModelId);
+      if (!name || !name.trim()) return;
+      try {
+        const res = await authFetch('/models/custom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim(), puterModel: puterModelId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          customModels.push(data.model);
+          renderCustomModels();
+          renderPuterModels();
+          setMessage(`Model "${name.trim()}" added.`);
+        } else {
+          setMessage(data.error || 'Failed to add model.');
+        }
+      } catch (err) { setMessage(err.message); }
+    };
 
     // -----------------------------------------------------------------------
     // Custom model CRUD
     // -----------------------------------------------------------------------
 
     function renderCustomModels() {
-      modelListEl.innerHTML = '';
+      customModelListEl.innerHTML = '';
       if (customModels.length === 0) {
-        modelListEl.innerHTML = '<li style="color:#627384;padding:12px;text-align:center;">No custom models yet. Add one below.</li>';
+        customModelListEl.innerHTML = '<li style="color:#627384;padding:12px;text-align:center;">No custom models yet. Add one from the Puter models list above.</li>';
         return;
       }
       customModels.forEach(cm => {
@@ -291,7 +289,7 @@
             <button class="danger" onclick="deleteModel('${cm.id}')">Delete</button>
           </span>
         `;
-        modelListEl.appendChild(li);
+        customModelListEl.appendChild(li);
       });
     }
 
@@ -299,32 +297,6 @@
       const d = document.createElement('div');
       d.textContent = str;
       return d.innerHTML;
-    }
-
-    async function addCustomModel() {
-      const name = customNameInput.value.trim();
-      const puterModel = puterModelInput.value.trim();
-      if (!name) return setMessage('Model name is required.');
-      if (!puterModel) return setMessage('Puter model is required.');
-      addModelBtn.disabled = true;
-      try {
-        const res = await authFetch('/models/custom', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, puterModel })
-        });
-        const data = await res.json();
-        if (data.success) {
-          customModels.push(data.model);
-          renderCustomModels();
-          customNameInput.value = '';
-          puterModelInput.value = '';
-          setMessage(`Model "${name}" added.`);
-        } else {
-          setMessage(data.error || 'Failed to add model.');
-        }
-      } catch (err) { setMessage(err.message); }
-      finally { addModelBtn.disabled = false; }
     }
 
     window.editModel = async function(id) {
@@ -374,7 +346,7 @@
       configKeyInput.value = state.config?.configAuthKey || 'mk-puter-key-123';
       apiKeyInput.value = currentApiKey;
       renderCustomModels();
-      puterModelDropdown.refreshOptions();
+      renderPuterModels();
       setIndicator(state.puterOnline !== false);
       setMessage('Ready.');
       refreshHealth();
@@ -397,7 +369,7 @@
         const res = await authFetch(`/models${force ? '?force=true' : ''}`);
         const data = await res.json();
         models = data.models || [];
-        puterModelDropdown.refreshOptions();
+        renderPuterModels();
         setIndicator(data.puterOnline !== false);
       } catch (err) {
         setMessage('Failed to load models: ' + err.message);
@@ -460,8 +432,8 @@
     // Event listeners
     // -----------------------------------------------------------------------
 
-    addModelBtn.addEventListener('click', addCustomModel);
     refreshHealthBtn.addEventListener('click', refreshHealth);
+    refreshModelsBtn.addEventListener('click', () => refreshModels(true));
     saveApiKeyBtn.addEventListener('click', saveApiKey);
     copyApiKeyBtn.addEventListener('click', copyApiKey);
     saveConfigKeyBtn.addEventListener('click', saveConfigKey);
