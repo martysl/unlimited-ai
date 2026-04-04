@@ -19,7 +19,7 @@ const {
   getConfig, updateConfig, getModelsCache, isModelsCacheStale, saveModelsCache,
   getSavedConfigs, addSavedConfig, updateSavedConfig, deleteSavedConfig,
   getSavedConfigById, getLastConfig,
-  getCustomModels, addCustomModel, updateCustomModel, deleteCustomModel, getCustomModelById,
+  getCustomModels, addCustomModel, updateCustomModel, deleteCustomModel, getCustomModelById, getCustomModelByName,
   resolveModel, checkModelAccess
 } = require('./config');
 const { handleChatCompletion } = require('./openai-adapter');
@@ -38,7 +38,6 @@ const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.raw({ type: 'audio/*', limit: '50mb' }));
 app.use(express.raw({ type: 'multipart/form-data', limit: '50mb' }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Ensure cache directories exist
 const CACHE_IMG_DIR = path.join(__dirname, '..', 'cache', 'images');
@@ -48,6 +47,9 @@ if (!fs.existsSync(CACHE_TEMP_DIR)) fs.mkdirSync(CACHE_TEMP_DIR, { recursive: tr
 
 // Serve cached images
 app.use('/cache/images', express.static(CACHE_IMG_DIR));
+
+// Static files LAST (after all API routes)
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ---------------------------------------------------------------------------
 // API Key Middleware
