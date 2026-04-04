@@ -31,10 +31,11 @@ function ensureImageCacheDir() {
 
 function initPuter() {
   if (puterInstance) return puterInstance;
-  // Priority: env var > config file
-  const authToken = process.env.PUTER_AUTH_TOKEN
+  // Priority: config file (set in UI) > env var
+  const authToken = (function() { try { return require('./config').getConfig().puterAuthToken; } catch { return ''; } })()
+    || process.env.PUTER_AUTH_TOKEN
     || process.env.puterAuthToken
-    || (function() { try { return require('./config').getConfig().puterAuthToken; } catch { return ''; } })();
+    || '';
   puterInstance = init(authToken);
   return puterInstance;
 }
