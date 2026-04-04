@@ -515,13 +515,18 @@ app.get('/config/state', requireConfigAuth, async (req, res) => {
 });
 
 app.post('/config/save', requireConfigAuth, (req, res) => {
-  const { puterModelId, spoofedOpenAIModelId, port, apiKey, configAuthKey } = req.body;
+  const { puterModelId, spoofedOpenAIModelId, port, apiKey, configAuthKey, puterAuthToken } = req.body;
   const updates = {};
   if (puterModelId !== undefined) updates.puterModel = puterModelId;
   if (spoofedOpenAIModelId !== undefined) updates.spoofedOpenAIModelId = spoofedOpenAIModelId;
   if (port !== undefined) updates.port = parseInt(port, 10);
   if (apiKey !== undefined) updates.apiKey = apiKey;
   if (configAuthKey !== undefined) updates.configAuthKey = configAuthKey;
+  if (puterAuthToken !== undefined) {
+    updates.puterAuthToken = puterAuthToken;
+    // Reset puter instance so it picks up the new token
+    try { require('./puter-client').resetPuter && require('./puter-client').resetPuter(); } catch {}
+  }
 
   const success = updateConfig(updates);
   if (success) {
@@ -593,6 +598,20 @@ app.delete('/models/custom/:id', requireConfigAuth, (req, res) => {
   const ok = deleteCustomModel(req.params.id);
   if (ok) return res.json({ success: true });
   res.status(404).json({ error: 'Model not found' });
+});
+
+// POST /models/test — Test a specific Puter model with a quick chat
+app.post('/models/test', requireConfigAuth, async (req, res) => {
+  const { model } = req.body;
+  if (!model) return res.status(400).json({ error: 'Model is required' });
+
+  try {
+    const { chat } = require('./puter-client');
+    const result = await chat('Say "ok"', { model });
+    res.json({ success: true, response: result.text || '' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message || 'Test failed' });
+  }
 });
 
 // Shutdown endpoint

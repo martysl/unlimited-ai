@@ -31,7 +31,10 @@ function ensureImageCacheDir() {
 
 function initPuter() {
   if (puterInstance) return puterInstance;
-  const authToken = process.env.PUTER_AUTH_TOKEN || process.env.puterAuthToken;
+  // Priority: env var > config file
+  const authToken = process.env.PUTER_AUTH_TOKEN
+    || process.env.puterAuthToken
+    || (function() { try { return require('./config').getConfig().puterAuthToken; } catch { return ''; } })();
   puterInstance = init(authToken);
   return puterInstance;
 }
@@ -636,6 +639,11 @@ function classifyError(error) {
   return { statusCode: 500, type: 'internal_server_error' };
 }
 
+function resetPuter() {
+  puterInstance = null;
+  puterOnline = false;
+}
+
 module.exports = {
   chat,
   chatStreamEmulated,
@@ -648,6 +656,7 @@ module.exports = {
   listModels,
   checkConnectivity,
   isPuterOnline,
+  resetPuter,
   estimateTokens,
   countMessageTokens,
   classifyError

@@ -57,6 +57,8 @@ function getDefaultConfig() {
   return {
     port: 11436,
     backend: 'puter',
+    // Puter auth token (can also be set via env PUTER_AUTH_TOKEN)
+    puterAuthToken: '',
     // Config UI auth key (separate from API key)
     configAuthKey: 'mk-puter-key-123',
     // Legacy single-model fields (backward compatible)

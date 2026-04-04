@@ -129,6 +129,10 @@
     .puter-model-item .pm-added { color: var(--added-color); font-size: 13px; font-weight: 600; }
     .puter-model-item .add-btn { background: var(--primary); color: white; padding: 6px 14px; font-size: 12px; border-radius: 8px; }
     .puter-model-item .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .puter-model-item .test-btn { background: var(--secondary); color: var(--secondary-text); padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+    .puter-model-item .test-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .puter-model-item .test-btn.testing { animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     /* Search input */
     .search-input { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; margin-bottom: 10px; background: var(--input-bg); color: var(--text); }
@@ -171,6 +175,16 @@
       <h1>Puter Local Model Emulator</h1>
       <p class="muted">Configure the OpenAI-compatible endpoint backed by Puter AI.</p>
     </header>
+
+    <div class="section">
+      <h2>Puter Auth Token</h2>
+      <p class="muted">Your Puter.com authentication token. Required for all API calls.</p>
+      <div class="key-row">
+        <input type="password" id="puter-token-input" placeholder="eyJhbGci..." autocomplete="off">
+        <button id="save-puter-token-btn" class="primary">Save</button>
+        <button id="toggle-puter-token-btn" class="copy-btn" title="Show/Hide">👁</button>
+      </div>
+    </div>
 
     <div class="section">
       <h2>Config Auth Key</h2>
@@ -239,6 +253,9 @@
     const puterModelsListEl = document.getElementById('puter-models-list');
     const puterModelsSearch = document.getElementById('puter-models-search');
     const themeToggle = document.getElementById('theme-toggle');
+    const puterTokenInput = document.getElementById('puter-token-input');
+    const savePuterTokenBtn = document.getElementById('save-puter-token-btn');
+    const togglePuterTokenBtn = document.getElementById('toggle-puter-token-btn');
 
     // -----------------------------------------------------------------------
     // Theme
@@ -342,13 +359,15 @@
         const li = document.createElement('li');
         li.className = 'puter-model-item';
         const alreadyAdded = customModels.some(cm => cm.puterModel === m.id);
+        const safeId = escHtml(m.id).replace(/'/g, "\\'");
         li.innerHTML = `
           <span class="pm-name">${escHtml(m.id)}</span>
           ${m.label ? `<span class="pm-label">${escHtml(m.label)}</span>` : ''}
           ${alreadyAdded
             ? `<span class="pm-added">✓ Added</span>`
-            : `<button class="add-btn" onclick="addFromPuter('${escHtml(m.id).replace(/'/g, "\\'")}')">Add</button>`
+            : `<button class="add-btn" onclick="addFromPuter('${safeId}')">Add</button>`
           }
+          <button class="test-btn" id="test-btn-${safeId}" onclick="testModel('${safeId}', this)">Test</button>
         `;
         puterModelsListEl.appendChild(li);
       });
@@ -407,6 +426,31 @@
       return d.innerHTML;
     }
 
+    window.testModel = async function(modelId, btnEl) {
+      btnEl.disabled = true;
+      btnEl.classList.add('testing');
+      btnEl.textContent = '...';
+      try {
+        const res = await authFetch('/models/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: modelId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setMessage(`✓ ${modelId}: "${data.response.substring(0, 80)}"`);
+        } else {
+          setMessage(`✗ ${modelId}: ${data.error}`);
+        }
+      } catch (err) {
+        setMessage(`✗ ${modelId}: ${err.message}`);
+      } finally {
+        btnEl.disabled = false;
+        btnEl.classList.remove('testing');
+        btnEl.textContent = 'Test';
+      }
+    };
+
     window.editModel = async function(id) {
       const cm = customModels.find(m => m.id === id);
       if (!cm) return;
@@ -453,6 +497,7 @@
       currentApiKey = state.config?.apiKey || 'sk-puter-123';
       configKeyInput.value = state.config?.configAuthKey || 'mk-puter-key-123';
       apiKeyInput.value = currentApiKey;
+      puterTokenInput.value = state.config?.puterAuthToken || '';
       renderCustomModels();
       renderPuterModels();
       setIndicator(state.puterOnline !== false);
@@ -536,6 +581,34 @@
         .catch(() => { configKeyInput.select(); setMessage('Select and copy manually.'); });
     }
 
+    async function savePuterToken() {
+      const newToken = puterTokenInput.value.trim();
+      if (!newToken) return setMessage('Puter token cannot be empty.');
+      savePuterTokenBtn.disabled = true;
+      try {
+        const res = await authFetch('/config/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ puterAuthToken: newToken })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setMessage('Puter token saved. Restarting connection...');
+          await refreshHealth();
+        } else {
+          setMessage(data.error || 'Failed to save Puter token.');
+        }
+      } catch (err) { setMessage(err.message); }
+      finally { savePuterTokenBtn.disabled = false; }
+    }
+
+    let puterTokenVisible = false;
+    function togglePuterToken() {
+      puterTokenVisible = !puterTokenVisible;
+      puterTokenInput.type = puterTokenVisible ? 'text' : 'password';
+      togglePuterTokenBtn.textContent = puterTokenVisible ? '🙈' : '👁';
+    }
+
     // -----------------------------------------------------------------------
     // Event listeners
     // -----------------------------------------------------------------------
@@ -547,6 +620,8 @@
     copyApiKeyBtn.addEventListener('click', copyApiKey);
     saveConfigKeyBtn.addEventListener('click', saveConfigKey);
     copyConfigKeyBtn.addEventListener('click', copyConfigKey);
+    savePuterTokenBtn.addEventListener('click', savePuterToken);
+    togglePuterTokenBtn.addEventListener('click', togglePuterToken);
   </script>
 </body>
 </html>
