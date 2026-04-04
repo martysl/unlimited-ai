@@ -91,6 +91,47 @@ function requireApiKey(req, res, next) {
 }
 
 // ---------------------------------------------------------------------------
+// Config Auth Middleware
+// ---------------------------------------------------------------------------
+
+/**
+ * Validate the config auth key from Authorization header or query string.
+ * Configured key defaults to "mk-puter-key-123".
+ * Protects config UI and config management endpoints.
+ */
+function requireConfigAuth(req, res, next) {
+  const config = getConfig();
+  const expectedKey = config.configAuthKey || 'mk-puter-key-123';
+
+  // Extract key from header or query
+  const authHeader = req.headers.authorization || '';
+  const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+  const providedKey = bearerMatch
+    ? bearerMatch[1]
+    : (req.query.config_key || req.headers['x-config-key'] || '');
+
+  if (!providedKey) {
+    return res.status(401).json({
+      error: {
+        message: 'No config auth key provided. Use Authorization: Bearer <key> or ?config_key=<key>',
+        type: 'invalid_request_error'
+      }
+    });
+  }
+
+  if (providedKey !== expectedKey) {
+    return res.status(401).json({
+      error: {
+        message: 'Invalid config auth key',
+        type: 'invalid_request_error'
+      }
+    });
+  }
+
+  next();
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -465,19 +506,20 @@ app.get('/health', async (req, res) => {
   }
 });
 
-app.get('/config/state', async (req, res) => {
+app.get('/config/state', requireConfigAuth, async (req, res) => {
   const force = req.query.force === 'true';
   const payload = await buildStatePayload(force);
   res.json(payload);
 });
 
-app.post('/config/save', (req, res) => {
-  const { puterModelId, spoofedOpenAIModelId, port, apiKey } = req.body;
+app.post('/config/save', requireConfigAuth, (req, res) => {
+  const { puterModelId, spoofedOpenAIModelId, port, apiKey, configAuthKey } = req.body;
   const updates = {};
   if (puterModelId !== undefined) updates.puterModel = puterModelId;
   if (spoofedOpenAIModelId !== undefined) updates.spoofedOpenAIModelId = spoofedOpenAIModelId;
   if (port !== undefined) updates.port = parseInt(port, 10);
   if (apiKey !== undefined) updates.apiKey = apiKey;
+  if (configAuthKey !== undefined) updates.configAuthKey = configAuthKey;
 
   const success = updateConfig(updates);
   if (success) {
@@ -515,11 +557,11 @@ app.get('/models', async (req, res) => {
 // Custom Model Management
 // ---------------------------------------------------------------------------
 
-app.get('/models/custom', requireApiKey, (req, res) => {
+app.get('/models/custom', requireConfigAuth, (req, res) => {
   res.json({ customModels: getCustomModels() });
 });
 
-app.post('/models/custom', requireApiKey, (req, res) => {
+app.post('/models/custom', requireConfigAuth, (req, res) => {
   const { name, puterModel } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
   if (!puterModel) return res.status(400).json({ error: 'Puter model is required' });
@@ -534,7 +576,7 @@ app.post('/models/custom', requireApiKey, (req, res) => {
   res.status(500).json({ error: 'Failed to create model' });
 });
 
-app.put('/models/custom/:id', requireApiKey, (req, res) => {
+app.put('/models/custom/:id', requireConfigAuth, (req, res) => {
   const { name, puterModel } = req.body;
   const updates = {};
   if (name !== undefined) updates.name = name.trim();
@@ -545,7 +587,7 @@ app.put('/models/custom/:id', requireApiKey, (req, res) => {
   res.status(404).json({ error: 'Model not found' });
 });
 
-app.delete('/models/custom/:id', requireApiKey, (req, res) => {
+app.delete('/models/custom/:id', requireConfigAuth, (req, res) => {
   const ok = deleteCustomModel(req.params.id);
   if (ok) return res.json({ success: true });
   res.status(404).json({ error: 'Model not found' });

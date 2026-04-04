@@ -39,14 +39,15 @@ function getConfig() {
     if (cachedConfig) {
       const stats = fs.statSync(CONFIG_PATH);
       if (configMtime && stats.mtime.getTime() === configMtime) {
-        return cachedConfig;
+        return { ...getDefaultConfig(), ...cachedConfig };
       }
       configMtime = stats.mtime.getTime();
     }
 
     cachedConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
     configMtime = fs.statSync(CONFIG_PATH).mtime.getTime();
-    return cachedConfig;
+    // Merge with defaults so new fields from updates are always present
+    return { ...getDefaultConfig(), ...cachedConfig };
   } catch (error) {
     return getDefaultConfig();
   }
@@ -56,6 +57,8 @@ function getDefaultConfig() {
   return {
     port: 11436,
     backend: 'puter',
+    // Config UI auth key (separate from API key)
+    configAuthKey: 'mk-puter-key-123',
     // Legacy single-model fields (backward compatible)
     puterModel: 'gpt-4o',
     spoofedOpenAIModelId: 'gpt-4o-mini',

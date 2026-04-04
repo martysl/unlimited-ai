@@ -52,24 +52,55 @@
     .add-model-form .field { flex: 1; }
     .add-model-form label { font-size: 13px; margin-bottom: 4px; }
 
-    /* API key section */
-    .api-key-row { display: flex; gap: 10px; align-items: center; }
-    .api-key-row input { flex: 1; font-family: monospace; }
-    .api-key-row button { white-space: nowrap; }
+    /* Key row */
+    .key-row { display: flex; gap: 10px; align-items: center; }
+    .key-row input { flex: 1; font-family: monospace; }
+    .key-row button { white-space: nowrap; }
     .copy-btn { background: #eef2f7; color: #1f2933; padding: 11px 14px; }
+
+    /* Login screen */
+    .login-overlay { position: fixed; inset: 0; background: #f4f6f8; display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .login-box { background: #fff; border-radius: 12px; padding: 36px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); max-width: 400px; width: 100%; text-align: center; }
+    .login-box h1 { margin-bottom: 8px; }
+    .login-box .muted { margin-bottom: 24px; }
+    .login-box input { margin-bottom: 16px; }
+    .login-box button { width: 100%; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- Login overlay -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-box">
+      <h1>Config Access</h1>
+      <p class="muted">Enter your config auth key to continue.</p>
+      <input type="text" id="login-key-input" placeholder="mk-puter-key-123" autocomplete="off">
+      <button id="login-btn" class="primary">Unlock</button>
+      <p id="login-error" class="muted" style="color:#b42318;margin-top:12px;"></p>
+    </div>
+  </div>
+
+  <!-- Main config UI (hidden until authenticated) -->
+  <div id="main-ui" class="container hidden">
     <header>
       <h1>Puter Local Model Emulator</h1>
       <p class="muted">Configure the OpenAI-compatible endpoint backed by Puter AI.</p>
     </header>
 
     <div class="section">
+      <h2>Config Auth Key</h2>
+      <p class="muted">Protects this configuration page.</p>
+      <div class="key-row">
+        <input type="text" id="config-key-input" placeholder="mk-puter-key-123" autocomplete="off">
+        <button id="save-configkey-btn" class="primary">Save</button>
+        <button id="copy-configkey-btn" class="copy-btn" title="Copy">📋</button>
+      </div>
+    </div>
+
+    <div class="section">
       <h2>API Key</h2>
       <p class="muted">Used for Authorization header on all /v1/ endpoints.</p>
-      <div class="api-key-row">
+      <div class="key-row">
         <input type="text" id="api-key-input" placeholder="sk-puter-123" autocomplete="off">
         <button id="save-apikey-btn" class="primary">Save</button>
         <button id="copy-apikey-btn" class="copy-btn" title="Copy">📋</button>
@@ -107,6 +138,12 @@
   </div>
 
   <script>
+    const loginOverlay = document.getElementById('login-overlay');
+    const mainUi = document.getElementById('main-ui');
+    const loginKeyInput = document.getElementById('login-key-input');
+    const loginBtn = document.getElementById('login-btn');
+    const loginError = document.getElementById('login-error');
+
     const modelListEl = document.getElementById('model-list');
     const customNameInput = document.getElementById('custom-model-name');
     const puterModelInput = document.getElementById('custom-puter-model');
@@ -119,7 +156,11 @@
     const apiKeyInput = document.getElementById('api-key-input');
     const saveApiKeyBtn = document.getElementById('save-apikey-btn');
     const copyApiKeyBtn = document.getElementById('copy-apikey-btn');
+    const configKeyInput = document.getElementById('config-key-input');
+    const saveConfigKeyBtn = document.getElementById('save-configkey-btn');
+    const copyConfigKeyBtn = document.getElementById('copy-configkey-btn');
 
+    let configAuthKey = '';
     let puterOnline = false;
     let models = [];
     let customModels = [];
@@ -137,6 +178,48 @@
     }
 
     // -----------------------------------------------------------------------
+    // Authenticated fetch helper
+    // -----------------------------------------------------------------------
+
+    function authFetch(url, options = {}) {
+      if (!options.headers) options.headers = {};
+      options.headers['Authorization'] = `Bearer ${configAuthKey}`;
+      return fetch(url, options);
+    }
+
+    // -----------------------------------------------------------------------
+    // Login
+    // -----------------------------------------------------------------------
+
+    async function tryLogin() {
+      const key = loginKeyInput.value.trim();
+      if (!key) { loginError.textContent = 'Key is required.'; return; }
+      loginBtn.disabled = true;
+      loginError.textContent = '';
+      try {
+        const res = await fetch('/config/state', {
+          headers: { 'Authorization': `Bearer ${key}` }
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          loginError.textContent = data.error?.message || 'Invalid key.';
+          return;
+        }
+        configAuthKey = key;
+        loginOverlay.classList.add('hidden');
+        mainUi.classList.remove('hidden');
+        loadState(await res.json());
+      } catch (err) {
+        loginError.textContent = err.message;
+      } finally {
+        loginBtn.disabled = false;
+      }
+    }
+
+    loginBtn.addEventListener('click', tryLogin);
+    loginKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryLogin(); });
+
+    // -----------------------------------------------------------------------
     // Puter model search dropdown
     // -----------------------------------------------------------------------
 
@@ -152,10 +235,7 @@
         const item = document.createElement('div');
         item.className = 'dropdown-item';
         item.textContent = option.label || option.id;
-        item.addEventListener('click', () => {
-          onSelect(option);
-          listEl.classList.remove('open');
-        });
+        item.addEventListener('click', () => { onSelect(option); listEl.classList.remove('open'); });
         listEl.appendChild(item);
       });
       if (options.length === 0) {
@@ -173,7 +253,6 @@
       function openMenu() { listEl.classList.add('open'); open = true; }
       function closeMenu() { listEl.classList.remove('open'); open = false; }
       function refreshOptions() { renderDropdown(listEl, getOptions(inputEl.value), onSelect); }
-
       inputEl.addEventListener('input', () => { refreshOptions(); openMenu(); });
       inputEl.addEventListener('click', (e) => {
         if (open) closeMenu(); else { refreshOptions(); openMenu(); }
@@ -185,8 +264,7 @@
     }
 
     const puterModelDropdown = setupSearchDropdown(
-      puterModelInput,
-      puterModelList,
+      puterModelInput, puterModelList,
       (q) => getFilteredModels(q),
       (opt) => { puterModelInput.value = opt.id; }
     );
@@ -228,10 +306,9 @@
       const puterModel = puterModelInput.value.trim();
       if (!name) return setMessage('Model name is required.');
       if (!puterModel) return setMessage('Puter model is required.');
-
       addModelBtn.disabled = true;
       try {
-        const res = await fetch('/models/custom', {
+        const res = await authFetch('/models/custom', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, puterModel })
@@ -246,11 +323,8 @@
         } else {
           setMessage(data.error || 'Failed to add model.');
         }
-      } catch (err) {
-        setMessage(err.message);
-      } finally {
-        addModelBtn.disabled = false;
-      }
+      } catch (err) { setMessage(err.message); }
+      finally { addModelBtn.disabled = false; }
     }
 
     window.editModel = async function(id) {
@@ -260,8 +334,7 @@
       if (!newName) return;
       const newPuter = prompt('Puter model:', cm.puterModel);
       if (!newPuter) return;
-
-      const res = await fetch(`/models/custom/${id}`, {
+      const res = await authFetch(`/models/custom/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName.trim(), puterModel: newPuter.trim() })
@@ -271,7 +344,7 @@
         const idx = customModels.findIndex(m => m.id === id);
         customModels[idx] = data.model;
         renderCustomModels();
-        setMessage(`Model updated.`);
+        setMessage('Model updated.');
       } else {
         setMessage(data.error || 'Failed to update model.');
       }
@@ -279,7 +352,7 @@
 
     window.deleteModel = async function(id) {
       if (!confirm('Delete this model?')) return;
-      const res = await fetch(`/models/custom/${id}`, { method: 'DELETE' });
+      const res = await authFetch(`/models/custom/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         customModels = customModels.filter(m => m.id !== id);
@@ -291,13 +364,20 @@
     };
 
     // -----------------------------------------------------------------------
-    // Fetch state & init
+    // State loading & helpers
     // -----------------------------------------------------------------------
 
-    async function fetchState(force = false) {
-      const res = await fetch(`/config/state${force ? '?force=true' : ''}`);
-      if (!res.ok) throw new Error('Failed to load state');
-      return res.json();
+    function loadState(state) {
+      customModels = state.customModels || [];
+      models = state.models || [];
+      currentApiKey = state.config?.apiKey || 'sk-puter-123';
+      configKeyInput.value = state.config?.configAuthKey || 'mk-puter-key-123';
+      apiKeyInput.value = currentApiKey;
+      renderCustomModels();
+      puterModelDropdown.refreshOptions();
+      setIndicator(state.puterOnline !== false);
+      setMessage('Ready.');
+      refreshHealth();
     }
 
     async function refreshHealth() {
@@ -314,7 +394,7 @@
 
     async function refreshModels(force = false) {
       try {
-        const res = await fetch(`/models${force ? '?force=true' : ''}`);
+        const res = await authFetch(`/models${force ? '?force=true' : ''}`);
         const data = await res.json();
         models = data.models || [];
         puterModelDropdown.refreshOptions();
@@ -324,62 +404,68 @@
       }
     }
 
-    async function init() {
-      try {
-        const state = await fetchState();
-        customModels = state.customModels || [];
-        models = state.models || [];
-        currentApiKey = state.config?.apiKey || 'sk-puter-123';
-        apiKeyInput.value = currentApiKey;
-        renderCustomModels();
-        puterModelDropdown.refreshOptions();
-        setIndicator(state.puterOnline !== false);
-        setMessage('Ready.');
-        await refreshHealth();
-      } catch (err) {
-        setMessage('Failed to load state: ' + err.message);
-      }
-    }
+    // -----------------------------------------------------------------------
+    // Save keys
+    // -----------------------------------------------------------------------
 
     async function saveApiKey() {
       const newKey = apiKeyInput.value.trim();
       if (!newKey) return setMessage('API key cannot be empty.');
       saveApiKeyBtn.disabled = true;
       try {
-        const res = await fetch('/config/save', {
+        const res = await authFetch('/config/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ apiKey: newKey })
         });
         const data = await res.json();
-        if (data.success) {
-          currentApiKey = newKey;
-          setMessage('API key updated.');
-        } else {
-          setMessage(data.error || 'Failed to update API key.');
-        }
-      } catch (err) {
-        setMessage(err.message);
-      } finally {
-        saveApiKeyBtn.disabled = false;
-      }
+        if (data.success) { currentApiKey = newKey; setMessage('API key updated.'); }
+        else { setMessage(data.error || 'Failed to update API key.'); }
+      } catch (err) { setMessage(err.message); }
+      finally { saveApiKeyBtn.disabled = false; }
     }
 
     function copyApiKey() {
-      navigator.clipboard.writeText(apiKeyInput.value).then(() => {
-        setMessage('API key copied to clipboard.');
-      }).catch(() => {
-        apiKeyInput.select();
-        setMessage('Select the key and copy manually.');
-      });
+      navigator.clipboard.writeText(apiKeyInput.value).then(() => setMessage('API key copied.'))
+        .catch(() => { apiKeyInput.select(); setMessage('Select and copy manually.'); });
     }
+
+    async function saveConfigKey() {
+      const newKey = configKeyInput.value.trim();
+      if (!newKey) return setMessage('Config key cannot be empty.');
+      saveConfigKeyBtn.disabled = true;
+      try {
+        const res = await authFetch('/config/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ configAuthKey: newKey })
+        });
+        const data = await res.json();
+        if (data.success) {
+          configAuthKey = newKey;
+          setMessage('Config auth key updated.');
+        } else {
+          setMessage(data.error || 'Failed to update config key.');
+        }
+      } catch (err) { setMessage(err.message); }
+      finally { saveConfigKeyBtn.disabled = false; }
+    }
+
+    function copyConfigKey() {
+      navigator.clipboard.writeText(configKeyInput.value).then(() => setMessage('Config key copied.'))
+        .catch(() => { configKeyInput.select(); setMessage('Select and copy manually.'); });
+    }
+
+    // -----------------------------------------------------------------------
+    // Event listeners
+    // -----------------------------------------------------------------------
 
     addModelBtn.addEventListener('click', addCustomModel);
     refreshHealthBtn.addEventListener('click', refreshHealth);
     saveApiKeyBtn.addEventListener('click', saveApiKey);
     copyApiKeyBtn.addEventListener('click', copyApiKey);
-
-    init();
+    saveConfigKeyBtn.addEventListener('click', saveConfigKey);
+    copyConfigKeyBtn.addEventListener('click', copyConfigKey);
   </script>
 </body>
 </html>
