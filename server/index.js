@@ -642,6 +642,54 @@ app.post('/models/test-all', requireConfigAuth, async (req, res) => {
   }
 });
 
+// POST /models/add-all-working — Add all tested models that passed as custom models
+app.post('/models/add-all-working', requireConfigAuth, async (req, res) => {
+  try {
+    const { results } = req.body; // Array of { model, status } from test-all
+    if (!results || !Array.isArray(results)) {
+      return res.status(400).json({ error: 'Results array required' });
+    }
+
+    const existing = new Set(getCustomModels().map(cm => cm.puterModel));
+    let added = 0;
+    let skipped = 0;
+
+    for (const r of results) {
+      if (r.status === 'ok' && !existing.has(r.model)) {
+        addCustomModel(r.model, r.model);
+        added++;
+      } else if (r.status === 'ok' && existing.has(r.model)) {
+        skipped++;
+      }
+    }
+
+    res.json({ success: true, added, skipped });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'Failed to add working models' });
+  }
+});
+
+// GET /models/export — Export working/failed model lists
+app.get('/models/export', requireConfigAuth, (req, res) => {
+  const { results } = req.query;
+  if (!results) return res.status(400).json({ error: 'Pass results as JSON in ?results=...' });
+
+  let parsed;
+  try { parsed = JSON.parse(results); } catch { return res.status(400).json({ error: 'Invalid JSON' }); }
+
+  const working = parsed.filter(r => r.status === 'ok').map(r => r.model);
+  const failed = parsed.filter(r => r.status === 'error').map(r => ({ model: r.model, error: r.error }));
+
+  const format = req.query.format || 'json';
+  if (format === 'txt') {
+    const type = req.query.type || 'working';
+    const list = type === 'failed' ? failed.map(f => f.model) : working;
+    res.type('text/plain').send(list.join('\n'));
+  } else {
+    res.json({ working, failed, workingCount: working.length, failedCount: failed.length });
+  }
+});
+
 // Shutdown endpoint
 app.post('/shutdown', (req, res) => {
   logInfo('Shutdown requested from UI');

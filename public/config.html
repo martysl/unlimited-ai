@@ -229,6 +229,14 @@
           <div id="test-all-bar" style="height:100%;width:0%;background:var(--primary);border-radius:3px;transition:width 0.2s;"></div>
         </div>
       </div>
+      <div id="test-actions" class="hidden" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+        <button id="add-all-working-btn" class="primary" style="font-size:12px;padding:8px 12px;">Add All Working</button>
+        <button id="export-working-btn" class="secondary" style="font-size:12px;padding:8px 12px;">Export Working</button>
+        <button id="export-failed-btn" class="secondary" style="font-size:12px;padding:8px 12px;">Export Failed</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;margin-left:auto;">
+          <input type="checkbox" id="hide-failed-toggle"> Hide failed
+        </label>
+      </div>
       <ul id="puter-models-list" class="puter-models-list"></ul>
     </div>
 
@@ -309,6 +317,7 @@
     let customModels = [];
     let currentApiKey = '';
     let testResults = {};
+    let lastTestResults = null;
     let testAllRunning = false;
     let testAllCancelled = false;
 
@@ -372,9 +381,17 @@
     function renderPuterModels() {
       puterModelsListEl.innerHTML = '';
       const query = (puterModelsSearch.value || '').trim().toLowerCase();
-      const filtered = query
+      const hideFailed = document.getElementById('hide-failed-toggle')?.checked;
+      let filtered = query
         ? models.filter(m => (m.id || '').toLowerCase().includes(query) || (m.label || '').toLowerCase().includes(query))
         : models;
+
+      if (hideFailed) {
+        filtered = filtered.filter(m => {
+          const r = testResults[m.id];
+          return !r || r.status === 'ok';
+        });
+      }
 
       if (filtered.length === 0) {
         puterModelsListEl.innerHTML = `<li style="padding:16px;text-align:center;color:#627384;">${models.length === 0 ? 'No models loaded. Click Refresh.' : 'No matches found.'}</li>`;
@@ -683,6 +700,8 @@
 
         testAllStatus.textContent = `Done: ${data.passed} passed, ${data.failed} failed of ${data.total}`;
         setMessage(`Test complete: ${data.passed} passed, ${data.failed} failed`);
+        lastTestResults = data.results;
+        document.getElementById('test-actions')?.classList.remove('hidden');
       } catch (err) {
         testAllStatus.textContent = 'Failed: ' + err.message;
         setMessage(err.message);
@@ -699,6 +718,56 @@
       testAllRunning = false;
       testAllBtn.disabled = false;
       setTimeout(() => testAllProgress.classList.add('hidden'), 2000);
+    });
+
+    document.getElementById('hide-failed-toggle')?.addEventListener('change', renderPuterModels);
+
+    document.getElementById('add-all-working-btn')?.addEventListener('click', async () => {
+      if (!lastTestResults) return setMessage('Run Test All first.');
+      const btn = document.getElementById('add-all-working-btn');
+      btn.disabled = true;
+      btn.textContent = 'Adding...';
+      try {
+        const res = await authFetch('/models/add-all-working', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ results: lastTestResults })
+        });
+        const data = await res.json();
+        if (data.success) {
+          customModels = getCustomModels ? (await authFetch('/models/custom').then(r => r.json())).customModels : customModels;
+          customModels = (await authFetch('/models/custom').then(r => r.json())).customModels;
+          renderCustomModels();
+          renderPuterModels();
+          setMessage(`Added ${data.added} models, skipped ${data.skipped} (already added).`);
+        } else {
+          setMessage(data.error || 'Failed to add working models.');
+        }
+      } catch (err) { setMessage(err.message); }
+      finally { btn.disabled = false; btn.textContent = 'Add All Working'; }
+    });
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('export-working-btn')?.addEventListener('click', () => {
+      if (!lastTestResults) return setMessage('Run Test All first.');
+      const working = lastTestResults.filter(r => r.status === 'ok').map(r => r.model);
+      downloadFile('working-models.txt', working.join('\n'), 'text/plain');
+      setMessage(`Exported ${working.length} working models.`);
+    });
+
+    document.getElementById('export-failed-btn')?.addEventListener('click', () => {
+      if (!lastTestResults) return setMessage('Run Test All first.');
+      const failed = lastTestResults.filter(r => r.status === 'error');
+      const lines = failed.map(f => `${f.model} — ${f.error}`);
+      downloadFile('failed-models.txt', lines.join('\n'), 'text/plain');
+      setMessage(`Exported ${failed.length} failed models.`);
     });
 
     // -----------------------------------------------------------------------
