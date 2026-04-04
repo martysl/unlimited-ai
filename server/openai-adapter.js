@@ -3,6 +3,7 @@
  *
  * Supports:
  *  - Multi-model routing (uses incoming `model` field)
+ *  - Custom model resolution (config-defined name -> Puter model)
  *  - Alias resolution via config
  *  - Emulated SSE streaming (full response split into chunks)
  *  - Non-streaming
@@ -11,7 +12,7 @@
  */
 
 const { chat, chatStreamEmulated, estimateTokens, countMessageTokens, classifyError } = require('./puter-client');
-const { getConfig, isEmulatorActive, resolveModel, checkModelAccess } = require('./config');
+const { resolveModel, checkModelAccess } = require('./config');
 const { logRequest, logSuccess, logError } = require('./logger');
 
 function generateCompletionId() {
@@ -82,17 +83,8 @@ function buildUsage(messages, text) {
 
 async function handleChatCompletion(requestBody, knownModels = []) {
   try {
-    if (!isEmulatorActive()) {
-      return createErrorResponse(
-        new Error('Emulator is not active. Start it from the configuration UI.'),
-        503,
-        'service_unavailable'
-      );
-    }
-
     validateRequest(requestBody);
 
-    const config = getConfig();
     const {
       model: requestedModel,
       messages,
@@ -105,7 +97,7 @@ async function handleChatCompletion(requestBody, knownModels = []) {
       tool_choice
     } = requestBody;
 
-    // Resolve model: alias -> known Puter model -> fallback
+    // Resolve model: custom model -> alias -> known Puter model -> fallback
     const { puterModel, responseModel } = resolveModel(requestedModel, knownModels);
 
     // Check allowlist/blocklist

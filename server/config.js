@@ -2,10 +2,10 @@
  * Configuration manager for the model emulator
  *
  * Supports:
- *  - defaultModel: fallback Puter model when none is specified
- *  - modelAliases: map of alias -> real Puter model (e.g. "gpt-4o" -> "gpt-5-nano")
- *  - modelAllowlist: if set, only these models are accepted
- *  - modelBlocklist: if set, these models are rejected
+ *  - customModels: array of { id, name, puterModel } — all always active
+ *  - defaultModel: fallback when requested model doesn't match any custom model
+ *  - modelAliases: legacy map of alias -> Puter model
+ *  - modelAllowlist / modelBlocklist: access control
  *  - Backward compatibility with legacy puterModel / spoofedOpenAIModelId
  */
 
@@ -26,11 +26,10 @@ let cachedConfig = null;
 let cachedModels = null;
 let cachedSavedConfigs = null;
 let configMtime = null;
-let emulatorActive = false;
 const MODELS_CACHE_TTL = 1000 * 60 * 30; // 30 minutes
 
 function generateId() {
-  return `cfg-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  return `mdl-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 }
 
 // Main Configuration
@@ -60,13 +59,14 @@ function getDefaultConfig() {
     // Legacy single-model fields (backward compatible)
     puterModel: 'gpt-4o',
     spoofedOpenAIModelId: 'gpt-4o-mini',
-    // New multi-model fields
+    // Multi-model: custom models with user-defined names
+    customModels: [],
+    // Fallback when no custom model matches
     defaultModel: 'gpt-4o',
+    // Legacy alias map
     modelAliases: {},
     modelAllowlist: [],
     modelBlocklist: [],
-    emulatorActive: false,
-    lastConfig: null,
     logging: { enabled: true, logRequests: true, logErrors: true }
   };
 }
@@ -84,6 +84,47 @@ function updateConfig(updates) {
 }
 
 // ---------------------------------------------------------------------------
+// Custom Model CRUD
+// ---------------------------------------------------------------------------
+
+function getCustomModels() {
+  return getConfig().customModels || [];
+}
+
+function addCustomModel(name, puterModel) {
+  const config = getConfig();
+  const models = config.customModels || [];
+  const newModel = { id: generateId(), name, puterModel };
+  models.push(newModel);
+  return updateConfig({ customModels: models }) ? newModel : null;
+}
+
+function updateCustomModel(modelId, updates) {
+  const config = getConfig();
+  const models = config.customModels || [];
+  const idx = models.findIndex(m => m.id === modelId);
+  if (idx === -1) return null;
+  Object.assign(models[idx], updates);
+  return updateConfig({ customModels: models }) ? models[idx] : null;
+}
+
+function deleteCustomModel(modelId) {
+  const config = getConfig();
+  const models = config.customModels || [];
+  const filtered = models.filter(m => m.id !== modelId);
+  if (filtered.length === models.length) return false;
+  return updateConfig({ customModels: filtered });
+}
+
+function getCustomModelById(modelId) {
+  return getCustomModels().find(m => m.id === modelId) || null;
+}
+
+function getCustomModelByName(name) {
+  return getCustomModels().find(m => m.name === name) || null;
+}
+
+// ---------------------------------------------------------------------------
 // Model resolution
 // ---------------------------------------------------------------------------
 
@@ -91,19 +132,29 @@ function updateConfig(updates) {
  * Resolve an incoming model name to the actual Puter model to use.
  *
  * Priority:
- *  1. If model is in the alias map, use the aliased Puter model
- *  2. If model is a known Puter model (from cache), use it directly
- *  3. If no model supplied or unknown, fall back to defaultModel / legacy puterModel
+ *  1. Match against customModels by name
+ *  2. Check legacy alias map
+ *  3. If model is a known Puter model (from cache), use it directly
+ *  4. Fall back to defaultModel / legacy puterModel
  *
  * Returns { puterModel: string, responseModel: string }
  */
 function resolveModel(requestedModel, knownModels = []) {
   const config = getConfig();
 
-  // Determine the alias map (new field or legacy spoofedOpenAIModelId)
-  const aliases = config.modelAliases || {};
+  // 1. Check custom models first
+  if (requestedModel) {
+    const custom = getCustomModelByName(requestedModel);
+    if (custom) {
+      return {
+        puterModel: custom.puterModel,
+        responseModel: custom.name
+      };
+    }
+  }
 
-  // 1. Check alias map first
+  // 2. Check legacy alias map
+  const aliases = config.modelAliases || {};
   if (requestedModel && aliases[requestedModel]) {
     return {
       puterModel: aliases[requestedModel],
@@ -111,7 +162,7 @@ function resolveModel(requestedModel, knownModels = []) {
     };
   }
 
-  // 2. If requested model is known (in Puter's model list), use it directly
+  // 3. If requested model is known (in Puter's model list), use it directly
   if (requestedModel && knownModels.length > 0) {
     const knownIds = knownModels.map(m => typeof m === 'string' ? m : m.id);
     if (knownIds.includes(requestedModel)) {
@@ -122,7 +173,7 @@ function resolveModel(requestedModel, knownModels = []) {
     }
   }
 
-  // 3. If no model or unknown, fall back to configured default
+  // 4. Fall back to configured default
   const fallback = config.defaultModel || config.puterModel || 'gpt-4o';
   return {
     puterModel: fallback,
@@ -152,31 +203,6 @@ function checkModelAccess(model) {
   }
 
   return { allowed: true };
-}
-
-// ---------------------------------------------------------------------------
-// Emulator State
-// ---------------------------------------------------------------------------
-
-function isEmulatorActive() {
-  return emulatorActive;
-}
-
-function startEmulator(puterModelId, spoofedOpenAIModelId) {
-  const success = updateConfig({
-    puterModel: puterModelId,
-    spoofedOpenAIModelId: spoofedOpenAIModelId || '',
-    emulatorActive: true,
-    lastConfig: { puterModelId, spoofedOpenAIModelId: spoofedOpenAIModelId || '' }
-  });
-  if (success) emulatorActive = true;
-  return success;
-}
-
-function stopEmulator() {
-  const success = updateConfig({ emulatorActive: false });
-  if (success) emulatorActive = false;
-  return success;
 }
 
 // ---------------------------------------------------------------------------
@@ -215,7 +241,7 @@ function saveModelsCache(models) {
 }
 
 // ---------------------------------------------------------------------------
-// Saved Configurations
+// Saved Configurations (legacy presets)
 // ---------------------------------------------------------------------------
 
 function getSavedConfigs() {
@@ -279,21 +305,25 @@ function getLastConfig() {
   return getConfig().lastConfig || null;
 }
 
-// Initialize emulator state on module load
-emulatorActive = getConfig().emulatorActive === true;
-
 module.exports = {
   getConfig,
   updateConfig,
   getDefaultConfig,
+  // Custom model management
+  getCustomModels,
+  addCustomModel,
+  updateCustomModel,
+  deleteCustomModel,
+  getCustomModelById,
+  getCustomModelByName,
+  // Model resolution
   resolveModel,
   checkModelAccess,
-  isEmulatorActive,
-  startEmulator,
-  stopEmulator,
+  // Models cache
   getModelsCache,
   isModelsCacheStale,
   saveModelsCache,
+  // Saved configs (legacy presets)
   getSavedConfigs,
   addSavedConfig,
   updateSavedConfig,

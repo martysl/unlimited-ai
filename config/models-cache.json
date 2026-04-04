@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1775245833289,
+  "lastUpdated": 1775293077377,
   "models": [
     {
       "id": "claude-3-5-sonnet-20240620",
@@ -142,8 +142,8 @@
       "price": null
     },
     {
-      "id": "gemini-3-pro-preview",
-      "label": "gemini-3-pro-preview",
+      "id": "gemini-3.1-flash-lite-preview",
+      "label": "gemini-3.1-flash-lite-preview",
       "provider": "gemini",
       "isFree": false,
       "price": null
@@ -1052,6 +1052,20 @@
       "price": null
     },
     {
+      "id": "openrouter:google/gemma-4-26b-a4b-it",
+      "label": "openrouter:google/gemma-4-26b-a4b-it",
+      "provider": "openrouter",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "openrouter:google/gemma-4-31b-it",
+      "label": "openrouter:google/gemma-4-31b-it",
+      "provider": "openrouter",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "openrouter:google/lyria-3-clip-preview",
       "label": "openrouter:google/lyria-3-clip-preview",
       "provider": "openrouter",
@@ -1129,13 +1143,6 @@
       "price": null
     },
     {
-      "id": "openrouter:liquid/lfm-2.2-6b",
-      "label": "openrouter:liquid/lfm-2.2-6b",
-      "provider": "openrouter",
-      "isFree": false,
-      "price": null
-    },
-    {
       "id": "openrouter:liquid/lfm-2.5-1.2b-instruct:free",
       "label": "openrouter:liquid/lfm-2.5-1.2b-instruct:free",
       "provider": "openrouter",
@@ -1145,13 +1152,6 @@
     {
       "id": "openrouter:liquid/lfm-2.5-1.2b-thinking:free",
       "label": "openrouter:liquid/lfm-2.5-1.2b-thinking:free",
-      "provider": "openrouter",
-      "isFree": false,
-      "price": null
-    },
-    {
-      "id": "openrouter:liquid/lfm2-8b-a1b",
-      "label": "openrouter:liquid/lfm2-8b-a1b",
       "provider": "openrouter",
       "isFree": false,
       "price": null
@@ -2284,8 +2284,8 @@
       "price": null
     },
     {
-      "id": "openrouter:qwen/qwen3.6-plus-preview:free",
-      "label": "openrouter:qwen/qwen3.6-plus-preview:free",
+      "id": "openrouter:qwen/qwen3.6-plus:free",
+      "label": "openrouter:qwen/qwen3.6-plus:free",
       "provider": "openrouter",
       "isFree": false,
       "price": null
@@ -2585,8 +2585,50 @@
       "price": null
     },
     {
+      "id": "togetherai:agentica-org/deepcoder-14b-preview",
+      "label": "togetherai:agentica-org/deepcoder-14b-preview",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:arize-ai/qwen-2-1.5b-instruct",
       "label": "togetherai:arize-ai/qwen-2-1.5b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepcogito/cogito-v1-preview-llama-70b",
+      "label": "togetherai:deepcogito/cogito-v1-preview-llama-70b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepcogito/cogito-v1-preview-llama-70b-turbo",
+      "label": "togetherai:deepcogito/cogito-v1-preview-llama-70b-turbo",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepcogito/cogito-v1-preview-llama-8b",
+      "label": "togetherai:deepcogito/cogito-v1-preview-llama-8b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepcogito/cogito-v1-preview-qwen-14b",
+      "label": "togetherai:deepcogito/cogito-v1-preview-qwen-14b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepcogito/cogito-v1-preview-qwen-32b",
+      "label": "togetherai:deepcogito/cogito-v1-preview-qwen-32b",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2599,8 +2641,85 @@
       "price": null
     },
     {
+      "id": "togetherai:deepseek-ai/deepseek-coder-33b-instruct",
+      "label": "togetherai:deepseek-ai/deepseek-coder-33b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-ocr-2",
+      "label": "togetherai:deepseek-ai/deepseek-ocr-2",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:deepseek-ai/deepseek-r1",
       "label": "togetherai:deepseek-ai/deepseek-r1",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-r1-0528",
+      "label": "togetherai:deepseek-ai/deepseek-r1-0528",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-r1-distill-llama-70b",
+      "label": "togetherai:deepseek-ai/deepseek-r1-distill-llama-70b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-r1-distill-qwen-1.5b",
+      "label": "togetherai:deepseek-ai/deepseek-r1-distill-qwen-1.5b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-r1-distill-qwen-14b",
+      "label": "togetherai:deepseek-ai/deepseek-r1-distill-qwen-14b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-r1-distill-qwen-7b",
+      "label": "togetherai:deepseek-ai/deepseek-r1-distill-qwen-7b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-r1-original",
+      "label": "togetherai:deepseek-ai/deepseek-r1-original",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-v3-0324",
+      "label": "togetherai:deepseek-ai/deepseek-v3-0324",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-v3-base",
+      "label": "togetherai:deepseek-ai/deepseek-v3-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-v3-de",
+      "label": "togetherai:deepseek-ai/deepseek-v3-de",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2613,8 +2732,78 @@
       "price": null
     },
     {
+      "id": "togetherai:deepseek-ai/deepseek-v3.1-base",
+      "label": "togetherai:deepseek-ai/deepseek-v3.1-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-v3.1-terminus",
+      "label": "togetherai:deepseek-ai/deepseek-v3.1-terminus",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-v3.2",
+      "label": "togetherai:deepseek-ai/deepseek-v3.2",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:deepseek-ai/deepseek-v3.2-exp",
+      "label": "togetherai:deepseek-ai/deepseek-v3.2-exp",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:facebook/cwm",
+      "label": "togetherai:facebook/cwm",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:google/gemma-2b-it",
+      "label": "togetherai:google/gemma-2b-it",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:google/gemma-3-1b-it",
+      "label": "togetherai:google/gemma-3-1b-it",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:google/gemma-3-270m-it",
+      "label": "togetherai:google/gemma-3-270m-it",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:google/gemma-3-27b-pt",
+      "label": "togetherai:google/gemma-3-27b-pt",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:google/gemma-3n-e4b-it",
       "label": "togetherai:google/gemma-3n-e4b-it",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:hcompany/holo3-35b-a3b",
+      "label": "togetherai:hcompany/holo3-35b-a3b",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2627,8 +2816,22 @@
       "price": null
     },
     {
+      "id": "togetherai:meta-llama/llama-2-7b-chat-hf",
+      "label": "togetherai:meta-llama/llama-2-7b-chat-hf",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:meta-llama/llama-3-8b-chat-hf",
       "label": "togetherai:meta-llama/llama-3-8b-chat-hf",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:meta-llama/llama-3.1-405b",
+      "label": "togetherai:meta-llama/llama-3.1-405b",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2655,6 +2858,13 @@
       "price": null
     },
     {
+      "id": "togetherai:meta-llama/llama-3.2-3b",
+      "label": "togetherai:meta-llama/llama-3.2-3b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:meta-llama/llama-3.3-70b-instruct-turbo",
       "label": "togetherai:meta-llama/llama-3.3-70b-instruct-turbo",
       "provider": "together-ai",
@@ -2662,8 +2872,22 @@
       "price": null
     },
     {
+      "id": "togetherai:meta-llama/llama-4-maverick-17b-128e",
+      "label": "togetherai:meta-llama/llama-4-maverick-17b-128e",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
       "label": "togetherai:meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:meta-llama/llama-4-scout-17b-16e",
+      "label": "togetherai:meta-llama/llama-4-scout-17b-16e",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2683,6 +2907,20 @@
       "price": null
     },
     {
+      "id": "togetherai:meta-llama/meta-llama-3-70b-instruct-turbo",
+      "label": "togetherai:meta-llama/meta-llama-3-70b-instruct-turbo",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:meta-llama/meta-llama-3-8b-instruct",
+      "label": "togetherai:meta-llama/meta-llama-3-8b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:meta-llama/meta-llama-3-8b-instruct-lite",
       "label": "togetherai:meta-llama/meta-llama-3-8b-instruct-lite",
       "provider": "together-ai",
@@ -2690,8 +2928,43 @@
       "price": null
     },
     {
+      "id": "togetherai:meta-llama/meta-llama-3.1-70b",
+      "label": "togetherai:meta-llama/meta-llama-3.1-70b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:meta-llama/meta-llama-3.1-70b-instruct-turbo",
+      "label": "togetherai:meta-llama/meta-llama-3.1-70b-instruct-turbo",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:meta-llama/meta-llama-3.1-8b",
+      "label": "togetherai:meta-llama/meta-llama-3.1-8b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:meta-llama/meta-llama-3.1-8b-instruct-turbo",
       "label": "togetherai:meta-llama/meta-llama-3.1-8b-instruct-turbo",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:minimaxai/minimax-m1-40k",
+      "label": "togetherai:minimaxai/minimax-m1-40k",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:minimaxai/minimax-m1-80k",
+      "label": "togetherai:minimaxai/minimax-m1-80k",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2711,8 +2984,64 @@
       "price": null
     },
     {
+      "id": "togetherai:minimaxai/minimax-m2.5-fp4",
+      "label": "togetherai:minimaxai/minimax-m2.5-fp4",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/devstral-small-2505",
+      "label": "togetherai:mistralai/devstral-small-2505",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/magistral-small-2506",
+      "label": "togetherai:mistralai/magistral-small-2506",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/ministral-3-14b-instruct-2512",
+      "label": "togetherai:mistralai/ministral-3-14b-instruct-2512",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/mistral-7b-instruct-v0.1",
+      "label": "togetherai:mistralai/mistral-7b-instruct-v0.1",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/mistral-7b-instruct-v0.3",
+      "label": "togetherai:mistralai/mistral-7b-instruct-v0.3",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/mistral-7b-v0.1",
+      "label": "togetherai:mistralai/mistral-7b-v0.1",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:mistralai/mistral-small-24b-instruct-2501",
       "label": "togetherai:mistralai/mistral-small-24b-instruct-2501",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:mistralai/mixtral-8x22b-instruct-v0.1",
+      "label": "togetherai:mistralai/mixtral-8x22b-instruct-v0.1",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2725,8 +3054,78 @@
       "price": null
     },
     {
+      "id": "togetherai:mistralai/mixtral-8x7b-v0.1",
+      "label": "togetherai:mistralai/mixtral-8x7b-v0.1",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:moonshotai/kimi-k2-thinking",
+      "label": "togetherai:moonshotai/kimi-k2-thinking",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:moonshotai/kimi-k2.5",
       "label": "togetherai:moonshotai/kimi-k2.5",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/meta/llama-3.1-70b-instruct",
+      "label": "togetherai:nim/meta/llama-3.1-70b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/meta/llama-3.1-8b-instruct",
+      "label": "togetherai:nim/meta/llama-3.1-8b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/meta/llama-3.2-11b-vision-instruct",
+      "label": "togetherai:nim/meta/llama-3.2-11b-vision-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/meta/llama-3.2-90b-vision-instruct",
+      "label": "togetherai:nim/meta/llama-3.2-90b-vision-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/meta/llama-3.3-70b-instruct",
+      "label": "togetherai:nim/meta/llama-3.3-70b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/mistralai/mixtral-8x22b-instruct-v01",
+      "label": "togetherai:nim/mistralai/mixtral-8x22b-instruct-v01",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/mistralai/mixtral-8x7b-instruct-v01",
+      "label": "togetherai:nim/mistralai/mixtral-8x7b-instruct-v01",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nim/nv-mistralai/mistral-nemo-12b-instruct",
+      "label": "togetherai:nim/nv-mistralai/mistral-nemo-12b-instruct",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2739,8 +3138,64 @@
       "price": null
     },
     {
+      "id": "togetherai:nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
+      "label": "togetherai:nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nvidia/llama-3.1-nemotron-70b-instruct-hf",
+      "label": "togetherai:nvidia/llama-3.1-nemotron-70b-instruct-hf",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:nvidia/nvidia-nemotron-3-nano-30b-a3b-bf16",
       "label": "togetherai:nvidia/nvidia-nemotron-3-nano-30b-a3b-bf16",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nvidia/nvidia-nemotron-3-super-120b-a12b-fp8",
+      "label": "togetherai:nvidia/nvidia-nemotron-3-super-120b-a12b-fp8",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:nvidia/nvidia-nemotron-nano-9b-v2",
+      "label": "togetherai:nvidia/nvidia-nemotron-nano-9b-v2",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2-1.5b",
+      "label": "togetherai:qwen/qwen2-1.5b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2-1.5b-instruct",
+      "label": "togetherai:qwen/qwen2-1.5b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2-72b",
+      "label": "togetherai:qwen/qwen2-72b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2-7b",
+      "label": "togetherai:qwen/qwen2-7b",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2753,8 +3208,50 @@
       "price": null
     },
     {
+      "id": "togetherai:qwen/qwen2.5-1.5b",
+      "label": "togetherai:qwen/qwen2.5-1.5b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-1.5b-instruct",
+      "label": "togetherai:qwen/qwen2.5-1.5b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-14b",
+      "label": "togetherai:qwen/qwen2.5-14b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:qwen/qwen2.5-14b-instruct",
       "label": "togetherai:qwen/qwen2.5-14b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-32b",
+      "label": "togetherai:qwen/qwen2.5-32b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-3b-instruct",
+      "label": "togetherai:qwen/qwen2.5-3b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-72b",
+      "label": "togetherai:qwen/qwen2.5-72b",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2774,8 +3271,78 @@
       "price": null
     },
     {
+      "id": "togetherai:qwen/qwen2.5-7b",
+      "label": "togetherai:qwen/qwen2.5-7b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-7b-instruct",
+      "label": "togetherai:qwen/qwen2.5-7b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:qwen/qwen2.5-7b-instruct-turbo",
       "label": "togetherai:qwen/qwen2.5-7b-instruct-turbo",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-coder-32b-instruct",
+      "label": "togetherai:qwen/qwen2.5-coder-32b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen2.5-vl-72b-instruct",
+      "label": "togetherai:qwen/qwen2.5-vl-72b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-0.6b",
+      "label": "togetherai:qwen/qwen3-0.6b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-0.6b-base",
+      "label": "togetherai:qwen/qwen3-0.6b-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-1.7b",
+      "label": "togetherai:qwen/qwen3-1.7b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-1.7b-base",
+      "label": "togetherai:qwen/qwen3-1.7b-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-14b-base",
+      "label": "togetherai:qwen/qwen3-14b-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-235b-a22b-fp8",
+      "label": "togetherai:qwen/qwen3-235b-a22b-fp8",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2802,6 +3369,62 @@
       "price": null
     },
     {
+      "id": "togetherai:qwen/qwen3-30b-a3b-base",
+      "label": "togetherai:qwen/qwen3-30b-a3b-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-30b-a3b-instruct-2507-lora",
+      "label": "togetherai:qwen/qwen3-30b-a3b-instruct-2507-lora",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-4b-base",
+      "label": "togetherai:qwen/qwen3-4b-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-4b-instruct-2507",
+      "label": "togetherai:qwen/qwen3-4b-instruct-2507",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-8b",
+      "label": "togetherai:qwen/qwen3-8b",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-8b-base",
+      "label": "togetherai:qwen/qwen3-8b-base",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-8b-lora",
+      "label": "togetherai:qwen/qwen3-8b-lora",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-coder-30b-a3b-instruct",
+      "label": "togetherai:qwen/qwen3-coder-30b-a3b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:qwen/qwen3-coder-480b-a35b-instruct-fp8",
       "label": "togetherai:qwen/qwen3-coder-480b-a35b-instruct-fp8",
       "provider": "together-ai",
@@ -2818,6 +3441,34 @@
     {
       "id": "togetherai:qwen/qwen3-next-80b-a3b-instruct",
       "label": "togetherai:qwen/qwen3-next-80b-a3b-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-next-80b-a3b-instruct-fp8",
+      "label": "togetherai:qwen/qwen3-next-80b-a3b-instruct-fp8",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-next-80b-a3b-thinking",
+      "label": "togetherai:qwen/qwen3-next-80b-a3b-thinking",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-vl-235b-a22b-instruct-fp8",
+      "label": "togetherai:qwen/qwen3-vl-235b-a22b-instruct-fp8",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:qwen/qwen3-vl-32b-instruct",
+      "label": "togetherai:qwen/qwen3-vl-32b-instruct",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2844,6 +3495,13 @@
       "price": null
     },
     {
+      "id": "togetherai:qwen/qwen3.5-397b-a17b-fp8",
+      "label": "togetherai:qwen/qwen3.5-397b-a17b-fp8",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:qwen/qwen3.5-9b",
       "label": "togetherai:qwen/qwen3.5-9b",
       "provider": "together-ai",
@@ -2858,15 +3516,29 @@
       "price": null
     },
     {
-      "id": "togetherai:servicenow-ai/apriel-1.5-15b-thinker",
-      "label": "togetherai:servicenow-ai/apriel-1.5-15b-thinker",
+      "id": "togetherai:qwen/qwq-32b",
+      "label": "togetherai:qwen/qwq-32b",
       "provider": "together-ai",
       "isFree": false,
       "price": null
     },
     {
-      "id": "togetherai:servicenow-ai/apriel-1.6-15b-thinker",
-      "label": "togetherai:servicenow-ai/apriel-1.6-15b-thinker",
+      "id": "togetherai:sarvamai/sarvam-m",
+      "label": "togetherai:sarvamai/sarvam-m",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:togethercomputer/essentialai-rnj-1-instruct",
+      "label": "togetherai:togethercomputer/essentialai-rnj-1-instruct",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:togethercomputer/meta-llama-3.1-8b-instruct-awq-int4",
+      "label": "togetherai:togethercomputer/meta-llama-3.1-8b-instruct-awq-int4",
       "provider": "together-ai",
       "isFree": false,
       "price": null
@@ -2886,6 +3558,20 @@
       "price": null
     },
     {
+      "id": "togetherai:zai-org/glm-4.5v",
+      "label": "togetherai:zai-org/glm-4.5v",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:zai-org/glm-4.6",
+      "label": "togetherai:zai-org/glm-4.6",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
       "id": "togetherai:zai-org/glm-4.7",
       "label": "togetherai:zai-org/glm-4.7",
       "provider": "together-ai",
@@ -2895,6 +3581,20 @@
     {
       "id": "togetherai:zai-org/glm-5",
       "label": "togetherai:zai-org/glm-5",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:zai-org/glm-5-fp4",
+      "label": "togetherai:zai-org/glm-5-fp4",
+      "provider": "together-ai",
+      "isFree": false,
+      "price": null
+    },
+    {
+      "id": "togetherai:zai-org/glm-ocr",
+      "label": "togetherai:zai-org/glm-ocr",
       "provider": "together-ai",
       "isFree": false,
       "price": null

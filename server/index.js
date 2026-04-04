@@ -18,7 +18,8 @@ const fs = require('fs');
 const {
   getConfig, updateConfig, getModelsCache, isModelsCacheStale, saveModelsCache,
   getSavedConfigs, addSavedConfig, updateSavedConfig, deleteSavedConfig,
-  getSavedConfigById, isEmulatorActive, startEmulator, stopEmulator, getLastConfig,
+  getSavedConfigById, getLastConfig,
+  getCustomModels, addCustomModel, updateCustomModel, deleteCustomModel, getCustomModelById,
   resolveModel, checkModelAccess
 } = require('./config');
 const { handleChatCompletion } = require('./openai-adapter');
@@ -146,7 +147,7 @@ async function buildStatePayload(forceModels = false) {
     presets: getSavedConfigs(),
     models: models.models,
     modelsLastUpdated: models.lastUpdated,
-    emulatorActive: isEmulatorActive(),
+    customModels: getCustomModels(),
     puterOnline: models.puterOnline,
     lastConfig: getLastConfig(),
     health: {
@@ -166,14 +167,32 @@ app.get('/v1/models', requireApiKey, async (req, res) => {
     const modelsData = await getModels(req.query.force === 'true');
     const config = getConfig();
     const aliases = config.modelAliases || {};
+    const customModels = getCustomModels();
 
-    const data = (modelsData.models || []).map(m => ({
-      id: m.id,
-      object: 'model',
-      created: Math.floor(Date.now() / 1000),
-      owned_by: m.provider || 'puter',
-      active: true
-    }));
+    const data = [];
+
+    // Add custom models first (user-defined names)
+    for (const cm of customModels) {
+      data.push({
+        id: cm.name,
+        object: 'model',
+        created: Math.floor(Date.now() / 1000),
+        owned_by: 'custom',
+        active: true,
+        puter_model: cm.puterModel
+      });
+    }
+
+    // Add Puter models
+    for (const m of (modelsData.models || [])) {
+      data.push({
+        id: m.id,
+        object: 'model',
+        created: Math.floor(Date.now() / 1000),
+        owned_by: m.provider || 'puter',
+        active: true
+      });
+    }
 
     // Expose aliased models as separate entries
     for (const [alias, target] of Object.entries(aliases)) {
@@ -230,10 +249,6 @@ app.post('/v1/chat/completions', requireApiKey, async (req, res) => {
 // POST /v1/audio/speech — Text-to-Speech
 app.post('/v1/audio/speech', requireApiKey, async (req, res) => {
   try {
-    if (!isEmulatorActive()) {
-      return res.status(503).json({ error: { message: 'Emulator is not active', type: 'service_unavailable' } });
-    }
-
     const { input, model, voice, response_format } = req.body;
 
     if (!input) {
@@ -273,10 +288,6 @@ app.post('/v1/audio/speech', requireApiKey, async (req, res) => {
 // POST /v1/images/generations — Image Generation (cached to disk)
 app.post('/v1/images/generations', requireApiKey, async (req, res) => {
   try {
-    if (!isEmulatorActive()) {
-      return res.status(503).json({ error: { message: 'Emulator is not active', type: 'service_unavailable' } });
-    }
-
     const { prompt, model, n = 1, size, response_format = 'url' } = req.body;
 
     if (!prompt) {
@@ -320,10 +331,6 @@ app.post('/v1/images/generations', requireApiKey, async (req, res) => {
 // POST /v1/audio/transcriptions — Speech-to-Text (server-managed for large files)
 app.post('/v1/audio/transcriptions', requireApiKey, async (req, res) => {
   try {
-    if (!isEmulatorActive()) {
-      return res.status(503).json({ error: { message: 'Emulator is not active', type: 'service_unavailable' } });
-    }
-
     let audioSource = null;
     let language = null;
     let model = req.body?.model;
@@ -503,35 +510,44 @@ app.get('/models', async (req, res) => {
   res.json(models);
 });
 
-// Emulator control
-app.post('/emulator/start', async (req, res) => {
-  const { puterModelId, spoofedOpenAIModelId } = req.body;
-  if (!puterModelId) return res.status(400).json({ success: false, error: 'Puter model ID is required' });
+// ---------------------------------------------------------------------------
+// Custom Model Management
+// ---------------------------------------------------------------------------
 
-  const models = await getModels(true);
-  if (!models.puterOnline) {
-    return res.status(503).json({ success: false, error: 'Puter is offline' });
-  }
-
-  if (models.models.length && !models.models.some(m => m.id === puterModelId)) {
-    return res.status(400).json({ success: false, error: `Model "${puterModelId}" not found` });
-  }
-
-  if (startEmulator(puterModelId, spoofedOpenAIModelId)) {
-    logInfo(`Emulator started: ${puterModelId}`);
-    res.json({ success: true, config: { puterModelId, spoofedOpenAIModelId: spoofedOpenAIModelId || '' } });
-  } else {
-    res.status(500).json({ success: false, error: 'Failed to start' });
-  }
+app.get('/models/custom', requireApiKey, (req, res) => {
+  res.json({ customModels: getCustomModels() });
 });
 
-app.post('/emulator/stop', (req, res) => {
-  if (stopEmulator()) {
-    logInfo('Emulator stopped');
-    res.json({ success: true });
-  } else {
-    res.status(500).json({ success: false, error: 'Failed to stop' });
+app.post('/models/custom', requireApiKey, (req, res) => {
+  const { name, puterModel } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
+  if (!puterModel) return res.status(400).json({ error: 'Puter model is required' });
+
+  // Check for duplicate name
+  if (getCustomModelByName(name)) {
+    return res.status(409).json({ error: `Model "${name}" already exists` });
   }
+
+  const model = addCustomModel(name.trim(), puterModel);
+  if (model) return res.json({ success: true, model });
+  res.status(500).json({ error: 'Failed to create model' });
+});
+
+app.put('/models/custom/:id', requireApiKey, (req, res) => {
+  const { name, puterModel } = req.body;
+  const updates = {};
+  if (name !== undefined) updates.name = name.trim();
+  if (puterModel !== undefined) updates.puterModel = puterModel;
+
+  const model = updateCustomModel(req.params.id, updates);
+  if (model) return res.json({ success: true, model });
+  res.status(404).json({ error: 'Model not found' });
+});
+
+app.delete('/models/custom/:id', requireApiKey, (req, res) => {
+  const ok = deleteCustomModel(req.params.id);
+  if (ok) return res.json({ success: true });
+  res.status(404).json({ error: 'Model not found' });
 });
 
 // Shutdown endpoint
@@ -560,7 +576,7 @@ function startServer() {
     logInfo(`Puter Local Model Emulator started on http://localhost:${port}`);
     logInfo(`OpenAI endpoint: ${buildEndpoint()}`);
     logInfo(`API Key: ${config.apiKey || 'sk-puter-123'}`);
-    logInfo(`Emulator active: ${isEmulatorActive()}`);
+    logInfo(`Custom models: ${getCustomModels().length}`);
     logInfo(`Config UI: http://localhost:${port}/config.html`);
 
     // Refresh models cache in background
