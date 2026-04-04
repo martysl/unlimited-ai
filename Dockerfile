@@ -29,6 +29,6 @@ ENV PORT=11436
 EXPOSE 11436
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:11436/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:11436/health || exit 1
 
 CMD ["node", "server/index.js"]
